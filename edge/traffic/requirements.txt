@@ -70,7 +70,7 @@ mysqlclient==1.4.2.post1
 nbconvert==5.2.1
 nbformat==4.4.0
 networkx==2.3
-notebook==5.0.0
+notebook==5.7.8
 numpy==1.16.2
 olefile==0.44
 opencv-contrib-python==3.4.2.17
