@@ -133,6 +133,6 @@ urllib3==1.24.2
 visdom==0.1.8.8
 wcwidth==0.1.7
 websocket-client==0.56.0
-Werkzeug==0.15.2
+Werkzeug==0.15.3
 widgetsnbextension==3.0.2
 yarl==1.2.6
