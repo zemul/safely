@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.anbao.dao.MonitoredMapper" >
+  <resultMap id="BaseResultMap" type="com.anbao.pojo.Monitored" >
+    <id column="mac" property="mac" jdbcType="VARCHAR" />
+    <result column="aid" property="aid" jdbcType="INTEGER" />
+    <result column="node" property="node" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="VARCHAR" />
+    <result column="threshold" property="threshold" jdbcType="INTEGER" />
+    <result column="createtime" property="createtime" jdbcType="VARCHAR" />
+    <result column="time" property="time" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="getDeviceWithUserTel"  resultType="com.anbao.pojo.User">
+    select tel,uid from user where uid in (select uid from user_mac where mac=#{mac})
+  </select>
+
+  <select id="getDeviceBarchart" parameterType="String" resultType="com.anbao.pojo.echaets.areaBarChart">
+    SELECT
+    node,
+    count(e.mac) sum
+    FROM
+    monitored m
+    LEFT JOIN exception e ON m.mac = e.mac
+    AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(inittime)
+    WHERE
+    aid = #{aid}
+    GROUP BY
+    m.mac
+    ORDER BY
+    sum asc;
+  </select>
+
+  <select id="getAreaBarchart" resultType="com.anbao.pojo.echaets.areaBarChart">
+    <!--select * from areaSumList,area where areaSumList.aid=area.aid ORDER BY sum desc; -->
+    select * from area  LEFT JOIN areaSumList ON area.aid = areaSumList.aid ORDER BY sum asc;
+
+  </select>
+
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    mac, aid, node, state, threshold, createtime, time, num
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.anbao.pojo.MonitoredExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from monitored
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from monitored
+    where mac = #{mac,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from monitored
+    where mac = #{mac,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.anbao.pojo.MonitoredExample" >
+    delete from monitored
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.anbao.pojo.Monitored" >
+    insert into monitored (mac, aid, node, 
+      state, threshold, createtime, 
+      time, num)
+    values (#{mac,jdbcType=VARCHAR}, #{aid,jdbcType=INTEGER}, #{node,jdbcType=VARCHAR}, 
+      #{state,jdbcType=VARCHAR}, #{threshold,jdbcType=INTEGER}, #{createtime,jdbcType=VARCHAR}, 
+      #{time,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.anbao.pojo.Monitored" >
+    insert into monitored
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="mac != null" >
+        mac,
+      </if>
+      <if test="aid != null" >
+        aid,
+      </if>
+      <if test="node != null" >
+        node,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="threshold != null" >
+        threshold,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+      <if test="time != null" >
+        time,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="mac != null" >
+        #{mac,jdbcType=VARCHAR},
+      </if>
+      <if test="aid != null" >
+        #{aid,jdbcType=INTEGER},
+      </if>
+      <if test="node != null" >
+        #{node,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="threshold != null" >
+        #{threshold,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        #{time,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.anbao.pojo.MonitoredExample" resultType="java.lang.Integer" >
+    select count(*) from monitored
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update monitored
+    <set >
+      <if test="record.mac != null" >
+        mac = #{record.mac,jdbcType=VARCHAR},
+      </if>
+      <if test="record.aid != null" >
+        aid = #{record.aid,jdbcType=INTEGER},
+      </if>
+      <if test="record.node != null" >
+        node = #{record.node,jdbcType=VARCHAR},
+      </if>
+      <if test="record.state != null" >
+        state = #{record.state,jdbcType=VARCHAR},
+      </if>
+      <if test="record.threshold != null" >
+        threshold = #{record.threshold,jdbcType=INTEGER},
+      </if>
+      <if test="record.createtime != null" >
+        createtime = #{record.createtime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.time != null" >
+        time = #{record.time,jdbcType=VARCHAR},
+      </if>
+      <if test="record.num != null" >
+        num = #{record.num,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update monitored
+    set mac = #{record.mac,jdbcType=VARCHAR},
+      aid = #{record.aid,jdbcType=INTEGER},
+      node = #{record.node,jdbcType=VARCHAR},
+      state = #{record.state,jdbcType=VARCHAR},
+      threshold = #{record.threshold,jdbcType=INTEGER},
+      createtime = #{record.createtime,jdbcType=VARCHAR},
+      time = #{record.time,jdbcType=VARCHAR},
+      num = #{record.num,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.anbao.pojo.Monitored" >
+    update monitored
+    <set >
+      <if test="aid != null" >
+        aid = #{aid,jdbcType=INTEGER},
+      </if>
+      <if test="node != null" >
+        node = #{node,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="threshold != null" >
+        threshold = #{threshold,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        time = #{time,jdbcType=VARCHAR},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=INTEGER},
+      </if>
+    </set>
+    where mac = #{mac,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.anbao.pojo.Monitored" >
+    update monitored
+    set aid = #{aid,jdbcType=INTEGER},
+      node = #{node,jdbcType=VARCHAR},
+      state = #{state,jdbcType=VARCHAR},
+      threshold = #{threshold,jdbcType=INTEGER},
+      createtime = #{createtime,jdbcType=VARCHAR},
+      time = #{time,jdbcType=VARCHAR},
+      num = #{num,jdbcType=INTEGER}
+    where mac = #{mac,jdbcType=VARCHAR}
+  </update>
+</mapper>

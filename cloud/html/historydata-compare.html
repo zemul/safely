@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>公共区域人流量监管系统</title>
+
+    <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
+    <link rel="stylesheet" href="../../static/admin/layui/css/layui.css" media="all">
+</head>
+<body>
+<div class="page-content-wrap">
+    <div class="layui-inline">
+        <div class="col-lg-12">
+            <form class="layui-form">
+                <div class="layui-inline">
+                    <select  name="equ-id" id="equ-id" lay-filter="equ-select" lay-search >
+                        <option value="">请输入或选择设备名</option>
+                    </select>
+                </div>
+                <div class="layui-inline" >
+                    <input type="text" class="layui-input" lay-filter="date-choose" id="date-choose" placeholder="请选择第一个时间范围">
+                </div>
+                <div class="layui-inline" >
+                    <input type="text" class="layui-input" lay-filter="date-choose2" id="date-choose2" placeholder="请选择第二个时间范围">
+                </div>
+                &nbsp;&nbsp;
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" id="toolAddbtn"><i class="layui-icon">对比</i></button>
+
+            </form>
+        </div>
+    </div>
+<hr/>
+    <div class="layui-continer" id="continer">
+            <div class="row">
+                <div class="col-lg-12">
+                   <div class="row">
+                       <div class="col-lg-12" style="height:auto">
+                           <!--图表-->
+                           <form class="layui-form time-select" action="">
+
+                           </form>
+                           <div class="chart-panel panel panel-default" style="margin-bottom: 20px">
+                               <div id="dbcharts" style="height: 480px;"></div>
+                           </div>
+                       </div>
+
+                   </div>
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+<style>
+    .time-select{
+        margin-bottom: 10px;
+    }
+</style>
+<script src="../../static/admin/layui/layui.all.js"></script>
+<script src="../static/admin/js/echarts.min.js"></script>
+<script>
+    // //----------模块----------
+    var form = layui.form,$=layui.jquery;
+    var layer = layui.layer;
+    var table=layui.table;
+    // //执行一个laydate实例
+    var laydate = layui.laydate;
+    var dbecharts=echarts.init(document.getElementById('dbcharts'),'macarons');
+    var day1;
+    var day2;
+    var day3;
+    var day4;
+    var time1;
+    var time2;
+
+    //动态获取下拉菜单选项
+
+
+    //动态获取下拉菜单选项[边缘]
+    $.ajax({
+        url:'http://127.0.0.1:8080/area/getAreaName',
+        xhrFields: {withCredentials: true},
+        dataType:'json',
+        method:'POST',
+        success:function(message){
+            if(message.data2.state==2 || message.data2.state ==3){
+                //边缘段管理员
+                $.ajax({
+                    url:'http://127.0.0.1:8080/area/getAreaDevice',
+                    dataType:'json',
+                    data:{ "aid": message.data2.aid},
+                    method:'POST',
+                    success:function(device){
+                        $.each(device.data, function (index, item) {
+                            $('#equ-id').append(new Option(item.node, item.mac));// 下拉菜单里添加元素
+                        });
+                        layui.form.render("select");
+                    }
+                });
+            }
+        }
+    });
+
+//加载日期
+    laydate.render({
+        elem: '#date-choose',
+        type: 'date',
+        max:'date',
+        range: '~',
+        format: 'yyyy-MM-dd',
+        theme: '#01AAED',
+        done: function(value){
+            time1=value;
+            console.log(value); //得到日期生成的值
+            day1 = value.substring(0,10);
+            day2 = value.substring(13,23);
+        }
+    });
+    laydate.render({
+        elem: '#date-choose2',
+        type: 'date',
+        max:'date',
+        range: '~',
+        format: 'yyyy-MM-dd',
+        theme: '#01AAED',
+
+        done: function(value){
+            time2=value;
+            console.log(value); //得到日期生成的值
+            day3 = value.substring(0,10);
+            day4 = value.substring(13,23);
+        }
+    });
+
+    //查询对比结果
+    $("#toolAddbtn").click(function () {
+        var mac = $("#equ-id").val();
+        if(mac==null || mac==""){
+            layer.msg("请选择设备！")
+            return;
+        }
+        if(day1==null || day3==null){
+            layer.msg("请检查对比日期是否输入正确！");
+            return;
+        }
+        var dateList;
+        var dateList2;
+        var valueList;
+        var valueList2;
+        //请求数据
+        $.ajaxSettings.async = false;
+        $.post("http://127.0.0.1:8080/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day1,"day2" : day2}, function(json){
+            dateList =json.ylist;
+            valueList=json.xlist;
+        });
+        $.ajaxSettings.async = false;
+        $.post("http://127.0.0.1:8080/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day3,"day2" : day4}, function(json){
+            dateList2 =json.ylist;
+            valueList2=json.xlist;
+        });
+
+
+        setEcharts(dateList,valueList,dateList2,valueList2);
+
+        function setEcharts(dateList,valueList,dateList2,valueList2) {
+
+            var colors = ['#5793f3', '#d14a61', '#675bba'];
+
+            option = {
+                color: colors,
+
+                tooltip: {
+                    trigger: 'none',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                legend: {
+                    top:'25px',
+                    data:[day1+"~"+day2+'人流量', day3+"~"+day4+'人流量']
+                },
+                grid: {
+                    top: 70,
+                    bottom: 50
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: colors[1]
+                            }
+                        },
+                        axisPointer: {
+                            label: {
+                                formatter: function (params) {
+                                    return '人流量  ' + params.value
+                                        + (params.seriesData.length ? '：' + params.seriesData[0].data : '');
+                                }
+                            }
+                        },
+                        data: dateList
+                    },
+                    {
+                        type: 'category',
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: colors[0]
+                            }
+                        },
+                        axisPointer: {
+                            label: {
+                                formatter: function (params) {
+                                    return '人流量  ' + params.value
+                                        + (params.seriesData.length ? '：' + params.seriesData[0].data : '');
+                                }
+                            }
+                        },
+                        data: dateList2
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name:day1+"~"+day2+'人流量',
+                        type:'line',
+                        xAxisIndex: 1,
+                        smooth: true,
+                        data: valueList,
+                        showSymbol: false,
+                    },
+                    {
+                        name:day3+"~"+day4+'人流量',
+                        type:'line',
+                        smooth: true,
+                        showSymbol: false,
+                        data: valueList2
+                    }
+                ]
+            };
+
+
+            if (option && typeof option === "object") {
+                dbecharts.setOption(option, true);
+            }
+
+
+        }
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+    // 检测设备变化并自适应
+    $(window).resize(function(){
+        Firstcomchart.resize();
+        Secondcomchart.resize();
+    })
+
+</script>
+<style>
+
+</style>
+</body>
+</html>

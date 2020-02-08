@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>公共区域人流量监管系统</title>
+
+    <link rel="stylesheet" type="text/css" href="../static/admin/css/admin.css" />
+    <link rel="stylesheet" href="../static/admin/layui/css/layui.css">
+</head>
+
+<body>
+<div class="page-content-wrap">
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+
+            <div class="layui-inline" id="bydselect">
+                <select name="fringe" id="fringe" lay-verify="required" lay-filter="fringe" lay-search>
+                    <option value="">请选择边缘端</option>
+                </select>
+            </div>
+            <div class="layui-inline">
+                <select  name="equ-id" id="equ-id" lay-filter="equ-id" lay-search >
+                    <option value="">请选择或输入设备节点</option>
+                </select>
+            </div>
+
+        </div>
+    </form>
+    <hr/>
+    <div class="layui-continer" id="continer">
+        <div class="wrap-container welcome-container ">
+            <div class="row">
+                <div class="welcome-left-container col-lg-9">
+                    <div class="data-show">
+                        <ul class="clearfix">
+                            <li class="col-sm-12 col-md-3 col-xs-12">
+                                <a href="javascript:;" class="clearfix">
+                                    <div class="icon-bg bg-org f-l">
+                                        <span class="iconfont">&#xe7d3;</span>
+                                    </div>
+                                    <div class="right-text-con">
+                                        <p class="name">人流量数</p>
+                                        <p><span id="peopleNum" class="color-org" id="people-flow">0</span></p>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="col-sm-12 col-md-3 col-xs-12">
+                                <a href="javascript:;" class="clearfix">
+                                    <div class="icon-bg bg-blue f-l">
+                                        <span class="iconfont">&#xe871;</span>
+                                    </div>
+                                    <div class="right-text-con">
+                                        <p class="name">本月预警数</p>
+                                        <p><span id="deviceExceptionNumMonth" class="color-blue" id="equ-warning">0次</span></p>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="col-sm-12 col-md-3 col-xs-12" id="equnomal">
+                                <a href="javascript:;" class="clearfix">
+                                    <div class="icon-bg bg-green f-l">
+                                        <span class="iconfont">&#xe7b5;</span>
+                                    </div>
+                                    <div class="right-text-con">
+                                        <p class="name">设备当前状态</p>
+                                        <p><span class="color-green" id="state">正常</span></p>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="col-sm-12 col-md-3 col-xs-12" id="equwarning" style="display: none">
+                                <a href="javascript:;" class="clearfix">
+                                    <div class="icon-bg layui-bg-red f-l">
+                                        <span class="iconfont">&#xe85b;</span>
+                                    </div>
+                                    <div class="right-text-con">
+                                        <p class="name">设备当前状态</p>
+                                        <p><span class="color-green" style="color: #FF5722">异常</span></p>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="col-sm-12 col-md-3 col-xs-12" id="offline" style="display: none">
+                                <a href="javascript:;" class="clearfix">
+                                    <div class="icon-bg layui-bg-black f-l">
+                                        <span class="iconfont">&#xe85b;</span>
+                                    </div>
+                                    <div class="right-text-con">
+                                        <p class="name">设备当前状态</p>
+                                        <p><span class="color-green" style="color: #505050">离线</span></p>
+                                    </div>
+                                </a>
+                            </li>
+                            <!--中心拥挤度 2019/5/19-->
+                            <li class="col-sm-12 col-md-3 col-xs-12" id="centercrowd">
+                                <a href="javascript:;" class="clearfix">
+                                    <div class="icon-bg layui-bg-orange f-l">
+                                        <span class="iconfont">&#xe869;</span>
+                                    </div>
+                                    <div class="right-text-con">
+                                        <p class="name">中心拥挤度</p>
+                                        <p><span class="color-green" id="centeryj" style="color: #ffa418">0%</span></p>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--图表-->
+                    <div class="chart-panel panel panel-default" id="people_flow_chart" style="margin-bottom: 20px" style="height: 300px;">
+                        <div class="panel-header"></div>
+                        <div class="panel-body"  style="height: 300px;">
+                            <div class="none_info" align="center"><p style="color: #e2e2e2;font-size: 30px;margin-top: 135px">暂无数据</p></div>
+                            <div id="flow_people" style="height: 300px;display: none"></div>
+                            <div id="people_normal" style="height: 300px; display: none"></div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="welcome-edge col-lg-3">
+                    <!--设备信息-->
+                    <div class="panel panel-default comment-panel" style="height: 376px">
+                        <div class="panel-header">设备信息</div>
+                        <div class="panel-body">
+                            <div class="commentbox">
+                                <ul>
+                                    <li>设 备 名：<span id="lay-equ-name"></span></li>
+                                    <li>设 备I D：<span id="lay-equ-mac"></span></li>
+                                    <li>添加时间：<span id="lay-equ-createtime"></span></li>
+                                    <li>设备阈值: <span id="lay-equ-thr"></span></li>
+                                    <li>管 理 员：</br><div style="margin: 7px"><span id='lay-equ-manager' ></span></div></li>
+                                    <br>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .commentbox ul li{
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+</style>
+<script src="../static/admin/layui/layui.all.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var $=layui.jquery;;
+    $("#people_normal").css('width',$("#flow_people").parent().width());
+</script>
+<script src="../static/admin/js/echarts.min.js"></script>
+<script src="../static/admin/lib/echarts/echarts.js"></script>
+<script src="../static/admin/js/data-charts.js"></script>
+<script>
+        //----------模块----------
+        var form = layui.form,$=layui.jquery;
+        var layer = layui.layer;
+        var carousel = layui.carousel;
+        var websocket;
+        var xAxisData
+        var SeriesData0
+        var SeriesData1
+
+        //建造实例
+        carousel.render({
+            elem: '#test1',
+            width: '100%' ,//设置容器宽度
+            height:'300px',
+            arrow: 'always', //始终显示箭头
+
+            //,anim: 'updown' //切换动画方式
+        });
+         var response_status=1;//状态码
+
+
+
+
+
+
+
+
+        //动态获取下拉菜单选项[边缘]
+        $.ajax({
+            url:'http://127.0.0.1:8080/area/getAreaName',
+            xhrFields: {withCredentials: true},
+            dataType:'json',
+            method:'POST',
+            success:function(message){
+                if(message.data2.state==2 || message.data2.state ==3){
+                    $("#bydselect").css("display","none");
+                    //边缘段管理员
+                    $('#fringe').append(new Option(message.data2.addr, message.data2.aid));// 下拉菜单里添加元素
+                    $("#fringe").val(message.data2.aid);//默认选中
+                    $("#fringe").attr('style','display:none;');
+                    $("#fringe").attr('disabled','disabled');
+                    $("#fringe").css('color','#000000');
+
+                    $.ajax({
+                        url:'http://127.0.0.1:8080/area/getAreaDevice',
+                        dataType:'json',
+                        data:{ "aid": message.data2.aid},
+                        method:'POST',
+                        success:function(device){
+                            $.each(device.data, function (index, item) {
+                                $('#equ-id').append(new Option(item.node, item.mac));// 下拉菜单里添加元素
+                            });
+                            layui.form.render("select");
+
+                        }
+                    });
+
+                }else if(message.data2.state==1){
+                    $("#toolAddbtn").remove();
+
+                    $.each(message.data, function (index, item) {
+                        $('#fringe').append(new Option(item.addr, item.aid));// 下拉菜单里添加元素
+                        //$("#fringe").val(data[0].aid);//默认选中
+                    });
+
+                }
+                layui.form.render("select");
+
+            }
+        });
+
+        //监听选择边缘端
+        form.on("select(fringe)", function(data){
+            $.ajax({
+                url:'http://127.0.0.1:8080/area/getAreaDevice',
+                dataType:'json',
+                data:{ "aid": data.value},
+                method:'POST',
+                success:function(message){
+                    $("#equ-id").empty();
+                    form.render("equ-id");
+                    $.each(message.data, function (index, item) {
+                        $('#equ-id').append(new Option(item.node, item.mac));// 下拉菜单里添加元素
+                        $("#equ-id").val(message.data[0].mac);
+
+                    });
+                    selectDevice(message.data[0].mac);
+                    layui.form.render("select");
+
+                }
+            });
+
+        });
+
+
+        //监听选择设备
+        form.on("select(equ-id)", function(data){
+            selectDevice(data.value);
+        });
+
+        //选择设备方法
+        function  selectDevice (mac){
+            if(websocket!=null){
+                websocket.close();
+                websocket=null;
+
+            }
+
+            //获取设备信息，绑定的用户
+            $.ajax({
+                url:'http://127.0.0.1:8080/device/selectDeviceInfo',
+                dataType:'json',
+                data:{ "mac": mac},
+                method:'POST',
+                success:function(message){
+                    console.log(message);
+                    $("#lay-equ-name").html(message.monitored.node);
+                    $("#lay-equ-mac").html(message.monitored.mac);
+                    $("#lay-equ-createtime").html(message.monitored.createtime);
+                    $("#lay-equ-thr").html(message.monitored.threshold);
+                    $("#peopleNum").html(message.peopleNum);
+                    $("#centeryj").html(parseInt((parseFloat(message.peopleNum)/parseFloat(message.monitored.threshold))*100)+"%");
+                    $("#deviceExceptionNumMonth").html(message.deviceExceptionNumMonth);
+                    $('#lay-equ-manager').html(null);
+                    $.each(message.managerList,function (index,item) {
+                        $('#lay-equ-manager').append(item.name+" "+item.tel+"</br>");// 添加元素
+                    })
+
+                    if(message.monitored.state==1){
+                        response_status=1;
+                        zhengchang(message.monitored.mac);
+                    }else if(message.monitored.state==2){
+                        response_status=2;
+                        baojing(message.monitored.mac);
+                    }else if(message.monitored.state==0){
+                        response_status=0;
+                        lixian();
+
+                    }
+
+
+                }
+            });
+
+
+        }
+
+
+
+
+// 检测设备变化并自适应
+        $(window).resize(function(){
+            flow.resize();
+        });
+
+
+//超过阈值报警
+
+        function  zhengchang(mac) {
+            if(response_status===1) {
+                $("#flow_people").css('display', 'none');
+                $(".none_info").attr("style","display:none;");
+                $("#people_normal").attr("style","display:block;");
+                $("#offline").css('display', 'none');
+                $("#equwarning").css('display', 'none');
+                $("#equnomal").css('display', 'block');
+                var data =[];
+                var data2 =[];
+                var time=[];
+                var time2=[];
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://127.0.0.1:8080/echarts/normal' ,
+                    data:{"mac" :mac},
+                    dataType:'json',
+                    success: function (response) {
+                        console.log(response);
+                        //请求成功时执行该函数内容，result即为服务器返回的json对象
+                        for (var i = 0; i < response.data.length; i++) {
+                            data.push(response.data[i].avg);    //挨个取出类别并填入类别数组
+                            time.push(response.data[i].data);    //挨个取出类别并填入类别数组
+                        }
+                        console.log(data)
+
+
+                        for(var i =0 ;i<= data.length-1;i++){
+                            data2[i]=("-");
+                            if(i==data.length-1){
+                                data2[i]=data[i];
+                            }
+                        }
+
+                        for (var i = 0; i < response.data2.length; i++) {
+                            data2.push(response.data2[i].avg);    //挨个取出类别并填入类别数组
+                            time2.push(response.data2[i].data);
+
+                        }
+                        SeriesData0=data;//24小时流量
+                        xAxisData = time.concat(time2);//时间数组
+                        console.log(xAxisData)
+                        console.log(data2)
+                        SeriesData1=data2;
+
+
+
+
+                        var people_normal=echarts.init(document.getElementById("people_normal"));
+                        var normal_option = {
+                            xAxis: {
+                                data: xAxisData
+                            },
+                            series: [
+                                {
+                                    data:SeriesData0
+                                },
+                                {
+                                    data:SeriesData1
+                                },
+                            ]
+                        };
+                        people_normal.setOption(normal_option);
+
+                    }
+                })
+            }}
+
+
+        function  lixian() {
+            $(".none_info").attr("style","display:block;");
+            $("#offline").css('display', 'block');
+            $("#people_normal").attr("style","display:none;");
+
+            $("#equwarning").css('display', 'none');
+            $("#equnomal").css('display', 'none');
+            $("#flow_people").css('display', 'none');
+
+
+        }
+
+        function baojing(mac){
+            if(response_status===2){
+                //$(".none_info").remove();
+                $("#people_normal").attr("style","display:none;");
+                $("#flow_people").css('display','block'); //超过阈值显示图表
+                $(".none_info").attr("style","display:none;");
+                $("#offline").css('display', 'none');
+                $("#equwarning").css('display','block');
+                $("#equnomal").css('display','none');
+                flow.resize();   //重新渲染图表
+                //打开websocket连接
+                //判断当前浏览器是否支持WebSocket
+                if ('WebSocket' in window) {
+                    // alert("浏览器支持Websocket")
+                    if(websocket ==null){
+                        websocket = new WebSocket("ws://127.0.0.1:8080/webSocket/"+mac);
+                    }
+                } else {
+                    console.log('当前浏览器 Not support websocket')
+                }
+                //连接发生错误的回调方法
+                websocket.onerror = function() {
+                    closeWebSocket();
+                };
+                //连接成功建立的回调方法
+                websocket.onopen = function() {
+                     console.log("WebSocket连接成功")
+                }
+                //接收到消息的回调方法
+                websocket.onmessage = function(event) {
+                    alert_info=(event.data);//传入数据
+                    var center =parseInt((parseFloat(event.data)/parseFloat($("#lay-equ-thr").html()))*100)+"%"
+                    Math.round(center);
+                    $("#centeryj").html(center);
+                    $("#peopleNum").html(event.data);
+
+                }
+                //连接关闭的回调方法
+                websocket.onclose = function() {
+                    websocket.close();
+                }
+
+                //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+                window.onbeforeunload = function() {
+                    closeWebSocket();
+                }
+                //关闭WebSocket连接
+                function closeWebSocket() {
+                    websocket.close();
+                }
+
+
+            }
+
+        }
+
+
+
+
+
+
+</script>
+
+</body>
+
+</html>

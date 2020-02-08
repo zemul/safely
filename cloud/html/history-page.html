@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--历史记录 -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>公共区域人流量监管系统</title>
+    <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
+    <link rel="stylesheet" href="../../static/admin/layui/css/layui.css" media="all">
+    <script src="../static/admin/js/jquery-3.3.1.js"></script>
+</head>
+
+<body>
+<div class="page-content-wrap">
+    <div class="layui-inline">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+
+                <div class="layui-inline" id="bydselect">
+                    <select name="fringe" id="fringe" lay-verify="required" lay-filter="fringe" lay-search>
+                        <option value="">请选择边缘端</option>
+                    </select>
+                </div>
+                <div class="layui-inline">
+                    <select  name="equ-id" id="equ-id" lay-filter="equ-id" lay-search >
+                        <option value="">请选择或输入设备节点</option>
+                    </select>
+                </div>
+                <div class="layui-inline">
+                    <input type="text" class="layui-input" lay-filter="date-choose" id="date-choose" placeholder="请选择时间范围">
+                </div>
+                <!--<div class="layui-inline tool-btn" style="float: right">-->
+                <!--<button class="layui-btn layui-btn-sm layui-btn-normal addBtn " data-url="menu-add2.html"><i class="layui-icon">&#xe654;</i></button>-->
+                <!--</div>-->
+                <!--分时段查看数据-->
+                <div class="layui-inline" >
+                    <div class="layui-btn-group"  >
+                        <div id="minute" class="layui-btn  layui-btn-primary" onclick="getEcharts('6h')">6小时</div>
+                        <div id="hours" class="layui-btn layui-btn-primary" onclick="getEcharts('24h')"  >24小时</div>
+                        <div id="days" class="layui-btn  layui-btn-primary" onclick="getEcharts('7d')">1周</div>
+                        <div id="weeks" class="layui-btn  layui-btn-primary" onclick="getEcharts('30d')">1月</div>
+
+                    </div>
+                      <div id="historydata-contrast" class="layui-btn layui-btn-primary" >历史数据对比</div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="layui-continer" id="continer">
+        <div class="wrap-container welcome-container ">
+            <div class="row">
+                <div class="welcome-left-container col-lg-12" >
+                    <!--图表-->
+                    <div class="chart-panel panel panel-default" id="history_chart" style="margin-bottom: 20px">
+                        <div id="historycharts" style="height: 400px;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+<style>
+    .click{
+        background-color:#1E9FFF;
+        color:#ffffff!important;
+    }
+</style>
+<script src="../static/admin/layui/layui.all.js"></script>
+<script src="../static/admin/js/echarts.min.js"></script>
+<script>
+    var layer = layui.layer;
+    var $=layui.jquery;
+    var historychart=echarts.init(document.getElementById('historycharts'),'macarons');
+
+
+    $('.layui-inline .layui-btn-group div').click(function () {
+        $(".layui-inline .layui-btn-group div").eq($(this).index()).addClass("click").siblings().removeClass("click");
+    });
+
+    //选择日期更新图表
+    function getEcharts(num){
+        var mac=$("#equ-id").val();
+        if(mac == ""){
+            layer.msg('请先选择设备！');
+            return;
+        }
+
+        $.post("http://127.0.0.1:8080/echarts/history",{ "mac": mac , "num" : num}, function(json){
+            setEcharts(json.ylist,json.xlist,json.zlist);
+            
+        });
+    }
+    function setEcharts(dateList,valueList,valueListMax) {
+        var option = {
+            title: {
+                text: '历史人流量',
+                left:'center',
+                textStyle:{
+                    //字体风格,'normal','italic','oblique'
+                    fontStyle:'normal',
+                    //字体粗细 'normal','bold','bolder','lighter',100 | 200 | 300 | 400...
+                    fontWeight:'400',
+                    //字体系列
+                    fontFamily:'sans-serif',
+                    //字体大小
+                    fontSize:18
+                }
+            },
+            tooltip : {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                }
+            },
+            dataZoom : [
+                {
+                    type: 'slider',//图表下方的伸缩条
+                    show : false,  //是否显示
+                    realtime : true,  //
+                    start : 0,  //伸缩条开始位置（1-100），可以随时更改
+                    end : 1000,  //伸缩条结束位置（1-100），可以随时更改
+                },
+                {
+                    type: 'inside',  //鼠标滚轮
+                    realtime : false,
+                    //还有很多属性可以设置，详见文档
+                }
+            ],
+            legend: {
+                data:['均值','峰值'],
+                top:"30px"
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '10%',
+                containLabel: true
+            },
+            xAxis : [
+                {
+                    type : 'category',
+                    boundaryGap : false,
+                    axisPointer: {
+                        value: '周一',
+                        snap: true,
+                        lineStyle: {
+                            color: '#004E52',
+                            opacity: 0.5,
+                            width: 2
+                        },
+                        label: {
+                            show: true,
+                            backgroundColor: '#004E52'
+                        },
+                        handle: {
+                            show: true,
+                            color: '#004E52'
+                        }
+                    },
+                    data : dateList
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'均值',
+                    smooth: true,
+                    type:'line',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            color: '#8ec6ad'
+                        }
+                    },
+                    areaStyle: {
+                        normal: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                offset: 0,
+                                color: '#8ec6ad'
+                            }, {
+                                offset: 1,
+                                color: '#ffe'
+                            }])
+                        }
+                    },
+                    data:valueList
+                },
+                {
+                    name:'峰值',
+                    smooth: true,
+                    type:'line',
+                    stack: '总量',
+                    itemStyle: {
+                        normal: {
+                            color: '#d68262'
+                        }
+                    },
+                    areaStyle: {
+                        normal: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                offset: 0,
+                                color: '#d68262'
+                            }, {
+                                offset: 1,
+                                color: '#ffe'
+                            }])
+                        },
+                    },
+                    data:valueListMax
+                }
+            ]
+        };
+
+
+        if (option && typeof option === "object") {
+            historychart.setOption(option, true);
+        }
+
+    }
+
+
+
+
+
+    // //----------模块----------
+    var form = layui.form,$=layui.jquery;
+    var layer = layui.layer;
+     var table=layui.table;
+
+
+    //动态获取下拉菜单选项[边缘]
+    $.ajax({
+        url:'http://127.0.0.1:8080/area/getAreaName',
+        xhrFields: {withCredentials: true},
+        dataType:'json',
+        method:'POST',
+        success:function(message){
+            if(message.data2.state==2 || message.data2.state ==3){
+                $("#bydselect").css("display","none");
+                //边缘段管理员
+                $('#fringe').append(new Option(message.data2.addr, message.data2.aid));// 下拉菜单里添加元素
+                $("#fringe").val(message.data2.aid);//默认选中
+                $("#fringe").attr('style','display:none;');
+                $("#fringe").attr('disabled','disabled');
+                $("#fringe").css('color','#000000');
+                $("#xhsearch").attr("xm-select-search","user/getSelectUser?aid="+$("#aid").val());
+
+
+                $.ajax({
+                    url:'http://127.0.0.1:8080/area/getAreaDevice',
+                    dataType:'json',
+                    data:{ "aid": message.data2.aid},
+                    method:'POST',
+                    success:function(device){
+                        $.each(device.data, function (index, item) {
+                            $('#equ-id').append(new Option(item.node, item.mac));// 下拉菜单里添加元素
+                        });
+                        layui.form.render("select");
+
+                    }
+                });
+
+
+
+                //执行重载
+                //渲染异常表格
+                table.reload('EquReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+
+                        aid: message.data2.aid
+
+                    }
+                });
+            }else if(message.data2.state==1){
+                $("#toolAddbtn").remove();
+                $.each(message.data, function (index, item) {
+                    $('#fringe').append(new Option(item.addr, item.aid));// 下拉菜单里添加元素
+                    //$("#fringe").val(data[0].aid);//默认选中
+                });
+
+            }
+            layui.form.render("select");
+
+        }
+    });
+
+    //监听选择边缘端
+    form.on("select(fringe)", function(data){
+        //alert(data.value);
+        //动态获取下拉菜单选项
+
+        $.ajax({
+            url:'http://127.0.0.1:8080/area/getAreaDevice',
+            dataType:'json',
+            data:{ "aid": data.value},
+            method:'POST',
+            success:function(message){
+                $.each(message.data, function (index, item) {
+                    $('#equ-id').append(new Option(item.node, item.mac));// 下拉菜单里添加元素
+
+                });
+                layui.form.render("select");
+
+            }
+        });
+        //执行重载
+        table.reload('EquReload', {
+            page: {
+                curr: 1 //重新从第 1 页开始
+            }
+            ,where: {
+                aid: data.value
+
+            }
+        });
+
+    });
+
+
+
+
+
+    //监听下拉菜单选择设备查看信息
+    form.on("select(equ-id)", function(data){
+        getEcharts('6h');
+
+
+    });
+
+
+
+
+      //历史数据对比
+    $("#historydata-contrast").click(function () {
+       var index=layer.open({
+            type: 2,
+            title: '历史数据对比',
+           offset: 't',
+            area: [document.body.offsetWidth+'px' ,document.body.offsetHeight+'px'],
+            fixed: false, //不固定
+            content: 'historydata-compare.html',
+        });
+       layer.full(index)
+    });
+
+
+
+
+
+    // //执行一个laydate实例
+    var laydate = layui.laydate;
+    laydate.render({
+        elem: '#date-choose',
+        type: 'date',
+        max:'date',
+        range: '~',
+        format: 'yyyy-MM-dd',
+        theme: '#01AAED',
+        done: function(value){
+            var day1 = value.substring(0,10);
+            var day2 = value.substring(13,23);
+            var mac=$("#equ-id").val();
+            //ajax请求返回图表
+            $.post("http://127.0.0.1:8080/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day1,"day2" : day2}, function(json){
+                setEcharts(json.ylist,json.xlist);
+
+
+            });
+
+        }
+    });
+
+
+
+
+
+    //数据表格渲染
+    table.render({
+
+        elem: '#equ-info',
+        title: '设备信息表',
+        limit:8,
+        autoSort: false,
+        toolbar: '#toolbar',
+        limits:[8,12,16,20],
+        page:{theme:'#01AAED'},
+        id:'EquReload',
+        cellMinWidth:140,
+        cols: [[
+            {type:'checkbox'},
+            {field:'Date', title: '日期'},
+            {field:'equStatus',title:'设备状态'},
+            {field:'inittime', title: '异常类型' },
+            {field:'continuetime', title: '异常持续时间'},
+            {field:'dateEnd',  title: '异常结束时间' },
+            {field:'VideoData', event:'lookOverVideo', title: '异常视频数据' },
+
+        ]],
+    });
+
+    //头工具栏事件
+    table.on('toolbar(equHistoryInfo)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        switch(obj.event){
+            case 'saveVideo':
+                //ajax请求视频数据
+                var data = checkStatus.data;
+            console.log(data);
+
+
+                break;
+        };
+    });
+
+     table.on('tool(equHistoryInfo)',function (obj) {
+         if (obj.event==='lookOverVideo') {
+             //向服务器请求指定日期的视频播放路径
+             if(window.innerWidth <= 768) {
+                 var index = layer.open({
+                     type: 2,
+                     title:'异常视频预览',
+                     offset: 'auto',
+                     area: ['655px', '420px'],
+                     content:'http://www.w3school.com.cn/i/movie.ogg',
+                     //弹层创建成功
+                     success: function(layero, index){
+
+                     },
+                     //弹层销毁
+                     end:function () {
+
+                     }
+                 });
+                 layer.full(index);
+             } else {
+                 var index = layer.open({
+                     type: 2,
+                     title:'异常视频预览',
+                     offset: 'auto',
+                     area: ['655px', '420px'],
+                     content:'http://www.w3school.com.cn/i/movie.ogg',
+                     success: function(layero, index){
+
+
+                     },
+                     end:function () {
+
+
+                     }
+
+     });
+             }
+         }
+     });
+    // 检测设备变化并自适应
+    $(window).resize(function(){
+        myChart.resize();
+    })
+
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.anbao.dao.FlowdataMapper" >
+  <resultMap id="BaseResultMap" type="com.anbao.pojo.Flowdata" >
+    <result column="mac" property="mac" jdbcType="VARCHAR" />
+    <result column="time" property="time" jdbcType="TIMESTAMP" />
+    <result column="avg" property="avg" jdbcType="DOUBLE" />
+    <result column="max" property="max" jdbcType="INTEGER" />
+    <result column="center" property="center" jdbcType="DOUBLE" />
+    <result column="variance" property="variance" jdbcType="DOUBLE" />
+  </resultMap>
+
+  <select id="getLastTimeFlowNum" parameterType="java.lang.String" resultType="java.lang.String">
+      select avg from flowdata  WHERE mac=#{mac} order by time  DESC limit 1
+  </select>
+
+  <select id="getForecast" resultType="com.anbao.pojo.flow">
+    SELECT time,avg FROM forecast where mac=#{0} and time >=(NOW())
+  </select>
+
+
+
+
+
+  <select id="getHistory"  resultType="com.anbao.pojo.flow">
+      SELECT time,avg,max FROM flowdata WHERE mac=#{mac}
+    <if test="num== '6h'" >
+      AND time >=(NOW() - interval 6 hour)
+    </if>
+
+    <if test="num== '24h'" >
+      AND time >=(NOW() - interval 24 hour)
+    </if>
+
+    <if test="num== '7d'" >
+      AND time >=(NOW() - interval 7 day)
+    </if>
+
+    <if test="num== '30d'" >
+      AND time >=(NOW() - interval 30 day)
+    </if>
+
+  </select>
+  <select id="getBetweenDayHistory"  resultType="com.anbao.pojo.flow">
+    select time,avg from flowdata WHERE mac=#{mac}
+    <if test="day1==day2">
+      AND to_days(time) = to_days(#{day1})
+    </if>
+    <if test="day1!=day2">
+      AND time between #{day1} and #{day2}
+    </if>
+  </select>
+
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    mac, time, avg, max, center, variance
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.anbao.pojo.FlowdataExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from flowdata
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="com.anbao.pojo.FlowdataExample" >
+    delete from flowdata
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.anbao.pojo.Flowdata" >
+    insert into flowdata (mac, time, avg, 
+      max, center, variance
+      )
+    values (#{mac,jdbcType=VARCHAR}, #{time,jdbcType=TIMESTAMP}, #{avg,jdbcType=DOUBLE}, 
+      #{max,jdbcType=INTEGER}, #{center,jdbcType=DOUBLE}, #{variance,jdbcType=DOUBLE}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.anbao.pojo.Flowdata" >
+    insert into flowdata
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="mac != null" >
+        mac,
+      </if>
+      <if test="time != null" >
+        time,
+      </if>
+      <if test="avg != null" >
+        avg,
+      </if>
+      <if test="max != null" >
+        max,
+      </if>
+      <if test="center != null" >
+        center,
+      </if>
+      <if test="variance != null" >
+        variance,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="mac != null" >
+        #{mac,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null" >
+        #{time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="avg != null" >
+        #{avg,jdbcType=DOUBLE},
+      </if>
+      <if test="max != null" >
+        #{max,jdbcType=INTEGER},
+      </if>
+      <if test="center != null" >
+        #{center,jdbcType=DOUBLE},
+      </if>
+      <if test="variance != null" >
+        #{variance,jdbcType=DOUBLE},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.anbao.pojo.FlowdataExample" resultType="java.lang.Integer" >
+    select count(*) from flowdata
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update flowdata
+    <set >
+      <if test="record.mac != null" >
+        mac = #{record.mac,jdbcType=VARCHAR},
+      </if>
+      <if test="record.time != null" >
+        time = #{record.time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.avg != null" >
+        avg = #{record.avg,jdbcType=DOUBLE},
+      </if>
+      <if test="record.max != null" >
+        max = #{record.max,jdbcType=INTEGER},
+      </if>
+      <if test="record.center != null" >
+        center = #{record.center,jdbcType=DOUBLE},
+      </if>
+      <if test="record.variance != null" >
+        variance = #{record.variance,jdbcType=DOUBLE},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update flowdata
+    set mac = #{record.mac,jdbcType=VARCHAR},
+      time = #{record.time,jdbcType=TIMESTAMP},
+      avg = #{record.avg,jdbcType=DOUBLE},
+      max = #{record.max,jdbcType=INTEGER},
+      center = #{record.center,jdbcType=DOUBLE},
+      variance = #{record.variance,jdbcType=DOUBLE}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+</mapper>

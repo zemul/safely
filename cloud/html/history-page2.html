@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--历史记录 -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>公共区域人流量监管系统</title>
+    <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
+    <link rel="stylesheet" href="../../static/admin/layui/css/layui.css" media="all">
+    <script src="../static/admin/js/jquery-3.3.1.js"></script>
+</head>
+
+<body>
+<div class="page-content-wrap">
+    <div class="layui-inline">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+
+                <div class="layui-inline" id="bydselect">
+                    <select name="fringe" id="fringe" lay-verify="required" lay-filter="fringe" lay-search>
+                        <option value="">请选择边缘端</option>
+                    </select>
+                </div>
+
+                <div class="layui-inline" >
+                    <input type="text" class="layui-input" lay-filter="date-choose" id="date-choose" placeholder="请选择时间范围">
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <div class="layui-continer" id="continer">
+        <div class="wrap-container welcome-container ">
+            <div class="row">
+
+
+                <div class="col-lg-12">
+                    <label>历史记录查询</label>
+                    <div class="layui-form" id="table-list" style="position: relative;">
+
+
+                        <table class="layui-hide" id="equ-info" lay-filter="equHistoryInfo"></table>
+                        <!--修改 2019/05/20-->
+                        <script type="textml" id="lookoverVideo">
+                            <div  align="center">
+                                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="LookVideo">查看视频</a>
+                            </div>
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+<style>
+    .click{
+        background-color:#1E9FFF;
+        color:#ffffff!important;
+    }
+</style>
+<script src="../static/admin/layui/layui.all.js"></script>
+<script src="../static/admin/js/jquery-3.3.1.js"></script>
+<script>
+    var dom = document.getElementById("container");
+    var app = {};
+    var $=layui.jquery;
+    // //----------模块----------
+    var form = layui.form,$=layui.jquery;
+    var layer = layui.layer;
+    var table=layui.table;
+    option = null;
+    //加载日期选择
+    var laydate = layui.laydate;
+
+
+    //数据表格渲染
+    table.render({
+        method:'post',
+        url:'http://127.0.0.1:8080/exception',
+        elem: '#equ-info',
+        title: '异常信息表',
+        limit:8,
+        autoSort: false,
+        limits:[8,12,16,20],
+        page:{theme:'#01AAED'},
+        id:'EquReload',
+        cellMinWidth:140,
+        cols: [[
+            {type:'checkbox'},
+            {field:'node', title: '设备节点' },
+            {field:'inittime', title: '爆发时间'},
+            {field:'continuetime',title:'持续时间'},
+            {fixed: 'right', title:'操作', toolbar: '#lookoverVideo',width:100}
+
+
+
+        ]],
+    });
+
+
+    //动态获取下拉菜单选项[边缘]
+    $.ajax({
+        url:'http://127.0.0.1:8080/area/getAreaName',
+        xhrFields: {withCredentials: true},
+        dataType:'json',
+        method:'POST',
+        success:function(message){
+            if(message.data2.state==2 || message.data2.state ==3){
+                $("#bydselect").css("display","none");
+                //边缘段管理员
+                $('#fringe').append(new Option(message.data2.addr, message.data2.aid));// 下拉菜单里添加元素
+                $("#fringe").val(message.data2.aid);//默认选中
+                $("#fringe").attr('style','display:none;');
+                $("#fringe").attr('disabled','disabled');
+                $("#fringe").css('color','#000000');
+                $("#xhsearch").attr("xm-select-search","user/getSelectUser?aid="+$("#aid").val());
+
+
+                $.ajax({
+                    url:'http://127.0.0.1:8080/area/getAreaDevice',
+                    dataType:'json',
+                    data:{ "aid": message.data2.aid},
+                    method:'POST',
+                    success:function(device){
+                        $.each(device.data, function (index, item) {
+                            $('#equ-id').append(new Option(item.node, item.mac));// 下拉菜单里添加元素
+                        });
+                        layui.form.render("select");
+
+                    }
+                });
+
+
+
+                //执行重载
+                //渲染异常表格
+                table.reload('EquReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+
+                        aid: message.data2.aid
+
+                    }
+                });
+            }else if(message.data2.state==1){
+                $("#toolAddbtn").remove();
+                $.each(message.data, function (index, item) {
+                    $('#fringe').append(new Option(item.addr, item.aid));// 下拉菜单里添加元素
+                });
+
+            }
+            layui.form.render("select");
+
+        }
+    });
+
+    //监听选择边缘端
+    form.on("select(fringe)", function(data){
+        //执行重载
+        table.reload('EquReload', {
+            page: {
+                curr: 1 //重新从第 1 页开始
+            }
+            ,where: {
+                aid: data.value
+
+            }
+        });
+
+    });
+
+
+
+    laydate.render({
+        elem: '#date-choose',
+        type: 'date',
+        max:'date',
+        range: '~',
+        format: 'yyyy-MM-dd',
+        theme: '#01AAED',
+
+
+        done: function(value){
+            console.log(value); //得到日期生成的值
+            var day1 = value.substring(0,10);
+            var day2 = value.substring(13,23);
+            //执行重载
+            //渲染异常表格
+            table.reload('EquReload', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+                    day1:day1,
+                    day2:day2,
+                    aid: $('#fringe').val()
+
+                }
+            });
+
+        }
+    });
+
+
+
+    //监听查看按钮
+    table.on('tool(equHistoryInfo)', function(obj){
+        var data = obj.data;
+        var videourl = data.videourl;
+        if(obj.event === 'LookVideo'){
+            console.log(obj);
+            if(window.innerWidth <= 768) {
+                var index = layer.open({
+                    type: 1,
+                    title:'异常视频预览',
+                    offset: 'auto',
+                    area: ['655px', '420px'],
+                    content:$("#videoContiner"),
+                    //弹层创建成功
+                    success: function(layero, index){
+
+                    },
+                    //弹层销毁
+                    end:function () {
+
+                    }
+                });
+                layer.full(index);
+            } else {
+                var index = layer.open({
+                    type: 2,
+                    title:'异常视频预览',
+                    offset: 'auto',
+                    area: ['655px', '420px'],
+                    content:'http://www.w3school.com.cn/i/movie.ogg',
+                    success: function(layero, index){
+
+
+                    },
+                    end:function () {
+
+
+                    }
+
+                });
+            }
+        }
+    });
+
+
+
+
+
+
+    // 检测设备变化并自适应
+    $(window).resize(function(){
+        myChart.resize();
+    })
+
+</script>
+</body>
+</html>

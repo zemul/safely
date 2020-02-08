@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head >
+	<meta charset="UTF-8">
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>公共区域人流量监管系统</title>
+	<link rel="stylesheet" type="text/css" href="../../static/admin/layui/css/layui.css"/>
+	<link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css"/>
+
+</head>
+<body>
+<div class="wrap-container welcome-container ">
+	<div class="row">
+		<div class="welcome-left-container col-lg-12">
+
+			<div class="data-show">
+				<ul class="clearfix">
+
+					<li class="col-sm-12 col-md-4 col-xs-12" style="padding-right: 0px">
+						<a href="javascript:;" class="clearfix">
+							<div class="icon-bg bg-green f-l">
+								<span class="iconfont">&#xe7b5;</span>
+							</div>
+							<div class="right-text-con">
+								<p id="areaSum" class="name">区域数量</p>
+								<p id="nodeSnm" class="name">节点数量</p>
+								<p>
+									<span class="color-green" id="equ-online-per">0 个</span>
+
+							</div>
+						</a>
+					</li>
+
+					<li class="col-sm-12 col-md-4 col-xs-12" style="padding-right: 0px" >
+						<a href="javascript:;" class="clearfix">
+							<div class="icon-bg bg-blue f-l">
+								<span class="iconfont">&#xe815;</span>
+							</div>
+							<div class="right-text-con">
+								<p class="name">安保人员</p>
+								<p><span class="color-blue" id="equ-online-per2">0 人</span></p>
+							</div>
+						</a>
+					</li>
+
+
+					<li class="col-sm-12 col-md-4 col-xs-12">
+						<a href="javascript:;" class="clearfix">
+							<div class="icon-bg bg-org f-l">
+								<span class="iconfont">&#xe871;</span>
+							</div>
+							<div class="right-text-con">
+								<p class="name">近一月预警次数</p>
+								<p><span class="color-org" id="equ-online-per3" >0 次</span></p>
+							</div>
+						</a>
+					</li>
+				</ul>
+
+
+				<div class="people-chart col-lg-8" style="padding-right: 0px;">
+					<!--图表-->
+					<div class="chart-panel panel panel-default" id="people_flow_chart">
+						<div id="freq-charts" style="height: 400px;"></div>
+					</div>
+				</div>
+				<div class=" col-lg-4">
+					<!--设备信息-->
+					<div class="panel panel-default comment-panel">
+						<div class="panel-header">人流量预警预报</div>
+
+						<table class="layui-table" id="sort-table"></table>
+					</div>
+				</div>
+				<!--<div class="page-content-wrap">-->
+					<!--<div class="layui-continer" id="continer">-->
+						<!--<div class="wrap-container welcome-container ">-->
+							<!--<div class="row">-->
+								<!--<div class="welcome-left-container col-lg-8">-->
+									<!--&lt;!&ndash;图表&ndash;&gt;-->
+									<!--<div class="chart-panel panel panel-default" id="people_flow_chart">-->
+										<!--<div id="freq-charts" style="height: 400px;"></div>-->
+									<!--</div>-->
+								<!--</div>-->
+							<!--</div>-->
+						<!--</div>-->
+					<!--</div>-->
+				<!--</div>-->
+
+
+
+
+				<!--<div class=" col-lg-4">-->
+					<!--&lt;!&ndash;设备信息&ndash;&gt;-->
+					<!--<div class="panel panel-default comment-panel">-->
+						<!--<div class="panel-header">人流量预警预报</div>-->
+						<!--<table class="layui-table" id="sort-table"></table>-->
+					<!--</div>-->
+				<!--</div>-->
+			</div>
+
+
+
+
+
+
+
+
+	</div>
+</div>
+
+
+	</div>
+<style>
+	#people_flow_chart{
+	  margin-bottom: 20px;
+	}
+	.comment-panel{
+		height: 300px;
+		/*box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)*/
+	}
+	div.welcome-edge.col-lg-4 > div > div.panel-body{
+		padding: 0 5px;
+	}
+	#sort-table{
+		display: none;
+	}
+	#continer > div.wrap-container.welcome-container > div > div.welcome-edge.col-lg-4 > div > div.panel-body > div{
+		margin: 0;
+	}
+
+
+	@media (max-width: 780px) {
+		.data-show ul li{
+			padding-right: 15px!important;
+		}
+		.data-show .people-chart{
+			padding-right: 15px!important;
+		}
+	}
+
+	/*.layui-table-body{overflow-x: hidden;}*/
+</style>
+<script src="../static/admin/layui/layui.all.js"></script>
+<script src="../static/admin/js/echarts.min.js"></script>
+
+
+<script type="text/javascript">
+	$=layui.jquery;
+	var xdata=[];
+	var seriesdata=[];
+	var aid = "";
+	var dignify;
+
+	//用户权限控制
+	$.ajax({
+		type: 'POST',
+		url: 'http://127.0.0.1:8080/user/getIndexInfo' ,
+		xhrFields: {withCredentials: true},
+		async:false,
+		dataType:'json',
+		success: function (response) {    //返回值即为状态码
+			if(parseInt(response.state) == 1){
+				//全局admin，显示每个边缘端状态
+				$("#nodeSnm").remove();
+				getAreaBarchart();
+			}else {
+				$("#areaSum").remove();
+
+				aid = response.aid;
+				//边缘端
+				getDeviceBarchart();
+			}
+
+		}
+
+	});
+
+	$.ajax({
+		type: 'POST',
+		url: 'http://127.0.0.1:8080/device/indexInfo' ,
+		dataType:'json',
+		data:{"aid":aid},
+		xhrFields: {withCredentials: true},
+		success:function (response) {
+			$("#equ-online-per2").html(response.peopleSum+" 人");
+			$("#equ-online-per3").html(response.monthExceptionSum+" 次");
+
+			if(aid!=null && aid!=""){
+				$("#equ-online-per").html(response.nodeSum +" 个");
+			}else{
+				$("#equ-online-per").html(response.areaSum +" 个");
+			}
+
+		}
+
+	})
+
+
+	//获取admin柱状图
+	function getAreaBarchart() {
+		$.ajax({
+			type: 'POST',
+			url: 'http://127.0.0.1:8080/echarts/getAreaBarchart' ,
+			dataType:'json',
+			xhrFields: {withCredentials: true},
+			success: function (response) {
+				console.log(response);
+				//请求成功时执行该函数内容，result即为服务器返回的json对象
+				for (var i = 0; i < response.length; i++) {
+					xdata.push(response[i].addr);    //挨个取出类别并填入类别数组
+					seriesdata.push(response[i].sum);    //挨个取出类别并填入类别数组
+				}
+				// for (var i = 0; i < response.length; i++) {
+				// 	seriesdata.push(response[i].sum);    //挨个取出类别并填入类别数组
+				// }
+
+				freqchart.setOption({        //加载数据图表
+
+					yAxis:{
+						data: xdata,
+						minInterval: 1
+					},
+					series: [{
+						// 根据名字对应到相应的系列
+						name: '报警次数',
+						data: seriesdata
+					}]
+				});
+				freqchart.setOption(freqoption);
+			}
+			})
+
+	}
+
+	//获取device柱状图
+	function getDeviceBarchart() {
+		$.ajax({
+			type: 'POST',
+			url: 'http://127.0.0.1:8080/echarts/getDeviceBarchart' ,
+			data:{"aid": aid},
+			xhrFields: {withCredentials: true},
+			dataType:'json',
+			success: function (response) {
+				console.log(response);
+				//请求成功时执行该函数内容，result即为服务器返回的json对象
+				for (var i = 0; i < response.length; i++) {
+					xdata.push(response[i].node);    //挨个取出类别并填入类别数组
+					seriesdata.push(response[i].sum);    //挨个取出类别并填入类别数组
+
+				}
+				freqchart.setOption({        //加载数据图表
+
+					yAxis:{
+						data: xdata,
+						type : 'value',
+						minInterval : 1,
+
+
+
+					},
+					series: [{
+						// 根据名字对应到相应的系列
+						name: '报警次数',
+						data: seriesdata
+					}]
+				});
+				freqchart.setOption(freqoption);
+			}
+		})
+
+	}
+		 var freqchart=echarts.init(document.getElementById('freq-charts'),'macarons');
+
+		 var rotate=0;
+		 var marginleft='4%'
+		 if(document.body.clientWidth <768){
+			 rotate=40,
+					 marginleft='8%'
+		 }else {
+			 rotate=0
+		 }
+	freqoption =  {
+		color: ['#8fd3e8'],
+		title: {
+			text: '最近一个月累计预警次数',
+			left:'center',
+			top:"15px",
+			textStyle:{
+				//字体风格,'normal','italic','oblique'
+				fontStyle:'normal',
+				//字体粗细 'normal','bold','bolder','lighter',100 | 200 | 300 | 400...
+				fontWeight:'400',
+				//字体系列
+				fontFamily:'sans-serif',
+				//字体大小
+				fontSize:18
+			}
+		},
+		tooltip: {
+			trigger: 'axis',
+			axisPointer: {
+				type: 'shadow'
+			}
+		},
+		grid: {
+
+			left: '1%',
+			right: '4%',
+			bottom: '3%',
+			containLabel: true
+		},
+		xAxis: {
+			type: 'value',
+			boundaryGap: [0, 0.01],
+			minInterval: 1,
+			axisLabel: {
+				interval:0,
+				rotate:rotate
+			},
+		},
+		yAxis: {
+			type: 'category',
+			data: xdata
+			// axisTick: {
+			//       alignWithLabel: true
+			//   }
+		},
+		series: [
+			{
+
+				name:'预警次数',
+				type:'bar',
+				barWidth: '50%',
+
+				data: seriesdata
+			},
+
+		]
+	};
+
+		 freqchart.setOption(freqoption);
+
+
+		 // 检测设备变化并自适应
+		 $(window).resize(function(){
+
+			 freqchart.resize();
+		 })
+</script>
+
+</body>
+</html>

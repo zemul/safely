@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html>
+<!--设备管理 -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>公共区域人流量监管系统</title>
+    <link rel="stylesheet" type="text/css" href="../static/admin/layui/css/layui.css" />
+    <link rel="stylesheet" type="text/css" href="../static/admin/css/admin.css" />
+    <link rel="stylesheet" href="../static/admin/formSelect/formSelects-v4.css">
+
+</head>
+
+<body>
+<div class="page-content-wrap">
+    <div class="toolHead">
+        <div class="layui-inline tool-btn" style="margin-top: 3px">
+            <button class="layui-btn layui-btn-sm layui-btn-normal" id="toolAddbtn"><i class="layui-icon">绑定设备</i></button>
+        </div>
+        <form class="layui-form">
+
+            <div class="layui-inline">
+                <select name="fringe" id="fringe" lay-verify="required" lay-filter="fringe" lay-search>
+                    <option value="">请选择或输入边缘端</option>
+                </select>
+            </div>
+            <div class="layui-inline" >
+                <div class="SearchTable" >
+                    <div>
+                        <input class="layui-input " name="id" id="demoReload" autocomplete="off" placeholder="请输入节点名称">
+                    </div>
+
+                    <div>
+                        <div class="layui-btn layui-btn-sm layui-btn-normal" data-type="reload" style="margin-top: 5px;margin-left: 5px",>搜索</div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+    <hr/>
+    <div id="table-list">
+
+        <table class="layui-hide" id="equ-info" lay-filter="equ-info"></table>
+        <script type="text/html" id="switchTpl">
+            <!-- 这里的 checked 的状态只是演示 -->
+            <input type="checkbox" name="state" state="{{d.state}}" value="{{d.mac}}" lay-skin="switch" lay-text="开机|关机" lay-filter="stateup"{{ d.state==0?'':'checked' }} >
+
+
+        </script>
+        <script type="text/html" id="Operate">
+            <div  align="center">
+                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</a>
+                <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="del">删除</a>
+            </div>
+
+        </script>
+    </div>
+
+
+
+</div>
+
+
+<!-- 推荐阈值-->
+<div id="Recommend" style="display: none" >
+    <div id="controls">
+        <div class="layui-inline">
+            <select id="strokeStyleSelect" class="inpueStyle">
+                <option value="">线条颜色</option>
+                <option value="red">红色</option>
+                <option value="green">绿色</option>
+                <option value="blue">蓝色</option>
+                <option value="orange">橙色</option>
+            </select>
+        </div>
+        <div class="layui-inline">
+            <input type="text" id="camera-height" class="inpueStyle" placeholder="摄像头高度（单位：米）"/>
+        </div>
+        <div class="layui-inline">
+            <input type="button" class="layui-btn layui-btn-normal layui-btn-xs" name="eraseAllButton" id="eraseAllButton" value="重置" />
+        </div>
+    </div>
+    <div align="center">
+        <canvas id="canvas" width="570" height="320">
+            <img/>
+
+        </canvas>
+        <div class="layui-inline">
+            <p style="color: #c2c2c2">提示：请绘制封闭图形框选人群范围</p>
+        </div>
+        <div class="layui-inline">
+            <p id="demoThr" style="color: #000000">查看示例</p>
+        </div>
+    </div>
+
+</div>
+<div id="demo" style="display: none" align="center"><img src="../images/demo.gif" style="width: 646px;height: 459px"></div>
+<!--添加设备表单(弹层) -->
+<div id="add-data" style="display: none;">
+    <form class="layui-form" style="width: 90%;padding-top: 20px;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">所在区域</label>
+            <div class="layui-input-block">
+                <input id="area" disabled type="text" name="addr" required  lay-verify="required" placeholder="请输所在区域" autocomplete="off" class="layui-input">
+                <input type="hidden" id="aid" name="aid">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点名称</label>
+            <!--<div class="layui-input-block">-->
+                <!--<input  type="text" name="mac" id="editMac" required  lay-verify="required" placeholder="请输入边缘端生成的设备ID" autocomplete="off" class="layui-input">-->
+            <!--</div>-->
+            <div class="layui-input-block">
+                <select  name="mac" id="equ-id" lay-filter="equ-id"  >
+                    <option value="">请选择或输入设备节点</option>
+
+                </select>
+            </div>
+            <div class="layui-input-block" id="qrcode-choose" style="display:none;margin-top: 10px">
+                <a href="javascript:;" class="file">选择二维码
+                    <input type="file" name="" id="qrcode-file">
+                </a>
+            </div>
+        </div>
+
+            <!--//节点名称-->
+            <!--<label class="layui-form-label">设备ID</label>-->
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属保安</label>
+            <div class="layui-input-block">
+                <select id="xhsearch" name="equmanager" xm-select="selectname" xm-select-height="36px" xm-select-skin="normal" xm-select-search="/search">
+                    <option value="">请选择或输入保安姓名</option>
+
+                </select>
+            </div>
+        </div>
+
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备阈值</label>
+            <div class="layui-input-block">
+                <input  type="text" name="threshold" id="autothreshold" required  lay-verify="required" placeholder="请输入设备阈值" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" id="recthr">
+            <div class="layui-input-block">
+                <div class="layui-btn layui-btn-normal layui-btn-xs" id="rec-thr">推荐阈值</div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">预警时间段</label>
+            <div class="layui-input-block">
+                <input  id="equ-warning-scope" type="text" name="time"  placeholder="报警时间范围" value="00:00 - 23:59" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="addform">立即提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+
+<!--编辑设备信息表单(弹层) -->
+<div id="edit-data" style="display: none;">
+    <form class="layui-form" style="width: 90%;padding-top: 20px;">
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备ID:</label>
+            <div class="layui-input-block">
+                <input id="mac" type="text" name="mac" disabled required  lay-verify="required" placeholder="请输入设备唯一ID(MAC地址等)" autocomplete="off" class="layui-input">
+            </div>
+
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">节点名称:</label>
+            <div class="layui-input-block">
+                <input id="node" type="text" name="node" required  lay-verify="required" placeholder="请输入设备名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属保安:</label>
+            <div class="layui-input-block">
+                <select name="equmanager" xm-select="selectname2" xm-select-height="36px" xm-select-skin="normal" xm-select-search="/search">
+                    <option value="">请选择或输入保安姓名:</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备阈值:</label>
+            <div class="layui-input-block">
+                <input id="threshold" type="text" name="threshold" required  lay-verify="required" placeholder="请输入设备部署地址" autocomplete="off" class="layui-input">
+                <input id="oldthreshold"  name="oldthreshold" type="hidden">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">预警时间段:</label>
+            <div class="layui-input-block">
+                <input  id="equ-warning-scope2" type="text" name="time"  placeholder="请选择报警时间范围" value="00:00 - 23:59" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="editform">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<style>
+    .inpueStyle{
+        border: 1px solid #ccc;
+        padding: 7px 0;
+        border-radius: 3px;
+        padding-left:5px;
+
+    }
+    .toolHead >div{
+        float: left;
+        margin-right: 10px;
+    }
+    img{
+        width: 100%;
+        height: 100%;
+    }
+    .toolHead .SearchTable div{
+        float: left;
+    }
+    .toolHead .SearchTable div button{
+        margin-left: 10px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+    .toolHead .tool-btn{
+        margin-top: 5px;
+    }
+    .layui-form-label{
+        width: 100px;
+    }
+    .layui-input-block {
+        margin-left: 130px;
+        min-height: 36px
+    }
+    .file {
+        position: relative;
+        display: inline-block;
+        background: #1E9FFF;
+        border: 1px solid #99D3F5;
+        border-radius: 4px;
+        padding: 4px 12px;
+        overflow: hidden;
+        color: #ffffff;
+        text-decoration: none;
+        text-indent: 0;
+        line-height: 20px;
+    }
+    .file input {
+        position: absolute;
+        font-size: 100px;
+        right: 0;
+        top: 0;
+        opacity: 0;
+    }
+    .file:hover {
+        background: #1E9FFF;
+        border-color: #78C3F3;
+        color: #ffffff;
+        text-decoration: none;
+    }
+    body {
+        background: #eeeeee;
+    }
+    #controls{
+        margin-top: 10px;
+        margin-left: 100px;
+    }
+    #controls > div:nth-child(1) > div > div > input{
+        width: 150px;
+        height: 25px;
+    }
+    #canvas {
+
+        background-size:100%;
+        background-repeat:no-repeat;
+        cursor: pointer;
+        margin-left: 10px;
+        margin-top: 10px;
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)
+    }
+    @media (max-width: 768px) {
+        #qrcode-choose{
+            display: block;
+            margin-top: 10px;
+
+        }
+    }
+</style>
+
+<script src="../static/admin/layui/layui.all.js" type="text/javascript" charset="utf-8"></script>
+<script src="../static/admin/formSelect/formSelects-v4.min.js"></script>
+<script src="../static/admin/js/recommend-thr.js"></script>
+<script>
+    var $=layui.jquery;
+    var table = layui.table;
+    var form = layui.form;
+    var laydate=layui.laydate;
+    var layer=layui.layer;
+    var load =null;
+
+    if($(window).width()<768){
+        $("#qrcode-choose").css('display','block').css('margin-top','10px');
+        $("#recthr").css('display','none')
+    }
+
+    //动态获取下拉菜单选项
+    $.ajax({
+        url:'http://127.0.0.1:8080/area/getAreaName',
+        xhrFields: {withCredentials: true},
+        dataType:'json',
+        method:'POST',
+        success:function(message){
+            console.log(message);
+            if(message.data2.state==2 || message.data2.state ==3){
+
+                //边缘段管理员
+                $('#fringe').append(new Option(message.data2.addr, message.data2.aid));// 下拉菜单里添加元素
+                $("#fringe").val(message.data2.aid);//默认选中
+                $("#fringe").attr('disabled','disabled');
+                $("#fringe").css('color','#000000');
+                $("#xhsearch").attr("xm-select-search","http://127.0.0.1:8080/user/getSelectUser?aid="+$("#aid").val());
+                //执行重载
+                table.reload('EquReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+
+                        aid: message.data2.aid
+
+                    }
+                });
+
+            }else if(message.data2.state==1){
+                $("#toolAddbtn").remove();
+                $.each(message.data, function (index, item) {
+                    $('#fringe').append(new Option(item.addr, item.aid));// 下拉菜单里添加元素
+                    //$("#fringe").val(data[0].aid);//默认选中
+                });
+
+            }
+            layui.form.render("select");
+        }
+    });
+
+
+
+    //监听开关机操作
+    form.on('switch(stateup)', function(obj){
+        //value,mac
+        //checked, true/false
+        layer.tips(this.value + ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+    });
+
+
+    //查看示例
+    $("#demoThr").click(function () {
+        layer.open({
+            type: 1,
+            title: '添加设备',
+            area: ['700px', '520px'],
+            fixed: false, //不固定
+            content: $("#demo")
+        });
+    });
+
+
+    //推荐阈值获取
+    $("#rec-thr").click(function () {
+        $("#canvas").css({"background":""})
+        //var editMac= $("#editMac").val();
+        var editMac = $("#equ-id").val();
+        if(editMac ==null ||  editMac==''){
+            layer.msg("请选择设备节点");
+            return ;
+        }
+        $.ajax({
+            url:"http://127.0.0.1:8080/device/askImage",
+            dataType:"json",
+            method:"POST",
+            data:{"mac":editMac}
+        });
+
+
+
+        //   background: url("images/image/AAABBBCCCD.jpg");
+        var url = "url('images/image/"+editMac+".jpg')";
+        var imgurl= "images/image/"+editMac+".jpg";
+        var i = 60;
+        timer = window.setInterval(function () {
+            i--;
+            var ImgObj = new Image(); //判断图片是否存在
+            ImgObj.src = imgurl;
+            if (ImgObj.fileSize > 0 || (ImgObj.width > 0 && ImgObj.height > 0)) {
+                window.clearInterval(timer);
+                $("#canvas").css('background',url);
+                $("#canvas").css('background-size','100% auto');
+                layer.close(load);
+            }
+            if(i==0){
+                window.clearInterval(timer);
+                layer.alert('监控预览超时，请检查设备是否正常启动且设备id是否正确！', {icon: 5, title: "错误"});
+                layer.close(load);
+            }
+
+        }, 500);
+
+
+
+
+        // 请求摄像头图片
+        // $.ajax({
+        //     type: 'POST',
+        //     dataType: 'text',
+        //     url: 'http://127.0.0.1:5000/register' ,
+        //     // data: JSON.stringify(data.field) ,
+        //     success: function (response) {
+        //         $("#canvas").css('background',response);
+        //     } ,
+        //     error:function(response){
+        //         layer.msg('当前设备无法推荐阈值，请一段时间后再试')
+        //     }
+        //
+        // });
+
+        //获取阈值弹窗
+        layer.open({
+            type: 1,
+            title: '推荐阈值',
+            area: ['650px', '500px'],
+            fixed: false, //不固定
+            content: $("#Recommend"),
+            btn: ['确定', '取消'],
+            success: function(layero, index){
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                load = layer.load();
+                console.log(layero, index);
+            },
+            end:function(){
+                window. clearInterval(timer);
+            },
+            yes: function(index, layero){
+                if (coordinate.length===0) {
+                    layer.msg('请画出人群范围');
+                    return false
+                }else if (coordinate.length<3){
+                    layer.msg('请围成封闭图形');
+                    return false
+                } else {
+                    // <!-- 修改 2019/5/19-->
+                    function cross(A,B,C) {
+                        return (B.x-A.x)*(C.y-A.y)-(B.y-A.y)*(C.x-A.x)
+                    }
+                    // console.log(cross(coordinate[0],coordinate[1],coordinate[2])) ;
+                    /**
+                     * @return {number}
+                     */
+                    function  Area(n,p) {
+                        var area=0;
+                        var i;
+                        var temp={'x':0,'y':0};
+                        for(i=0;i<n-1;i++){
+                            area+=cross(temp,p[i],p[i+1]);
+                        }
+                        area+=cross(temp,p[n-1],p[0]);
+                        area=area/2;
+                        return area > 0 ? area : -area;
+                    }
+                    //设置推荐阈值
+                    var cameraHeight=$("#camera-height").val();
+                    if(cameraHeight==0){
+                        layer.msg('请输入摄像头高度(单位：米)');
+                        return false
+                    }else {
+                        var thr=Math.floor(Area(coordinate.length,coordinate)/(60*60)*((cameraHeight/2)*(cameraHeight/2))*0.9);
+                        $("#set-equthr").val(thr);
+                        //循环得出坐标值
+                        // for (i=0;i<coordinate.length;i++) {
+                        // 	console.log(coordinate[i]);
+                        // }
+                        layer.close(index);
+                        layer.msg('设置阈值成功！推荐阈值为：'+thr)
+                        $("#autothreshold").val(thr);
+                    }
+                }
+            },
+            btn2:function(index,layero){
+                layer.close(index)
+            }
+        });
+    });
+
+    //识别二维码
+    var qrcodefile = document.getElementById('qrcode-file');
+    var getObjectURL = function (file) {
+        var url = null;
+        if (window.createObjectURL != undefined) { // basic
+            url = window.createObjectURL(file);
+        } else if (window.URL != undefined) { // mozilla(firefox)
+            url = window.URL.createObjectURL(file);
+        } else if (window.webkitURL != undefined) { // webkit or chrome
+            url = window.webkitURL.createObjectURL(file);
+        }
+        return url;
+    };
+
+
+    qrcodefile.onchange= function () {
+        console.log(getObjectURL(this.files[0]));// newfile[0]是通过input file上传的二维码图片文件
+        qrcode.decode(getObjectURL(this.files[0]));
+        qrcode.callback = function (imgMsg) {
+            $("#equ-id").val(imgMsg)
+        }
+    };
+
+
+
+
+    //监听下拉选择框事件（边缘端）
+    form.on("select(fringe)", function(data){
+
+        //执行重载
+        table.reload('EquReload', {
+            page: {
+                curr: 1 //重新从第 1 页开始
+            }
+            ,where: {
+                aid: data.value
+
+            }
+        });
+
+    });
+
+
+    //监听添加表单提交
+    form.on('submit(addform)', function(data) {
+        $.ajax({
+            url:'http://127.0.0.1:8080/device/Device',
+            dataType:'json',
+            method: 'POST',
+            data:data.field,
+
+        });
+    });
+    //监听编辑表单提交
+    form.on('submit(editform)', function(data) {
+        console.log(JSON.stringify(data.field));
+        $.ajax({
+            url:'http://127.0.0.1:8080/device/updateDevice',
+            dataType:'json',
+            method: 'POST',
+            data:data.field,
+            success:function(data){
+                table.reload('EquReload');
+
+            }
+        });
+    });
+    //弹层日期选择器渲染
+    laydate.render({
+        elem: '#equ-warning-scope2'
+        ,type: 'time'
+        ,range: '-'
+        ,format: 'HH:mm'
+        ,value: '00:00 - 23:59'
+    });
+    laydate.render({
+        elem: '#equ-warning-scope'
+        ,type: 'time'
+        ,range: '-'
+        ,format: 'HH:mm'
+        ,value: '00:00 - 23:59'
+    });
+
+
+    //数据表格渲染
+    table.render({
+        elem: '#equ-info',
+        url:'http://127.0.0.1:8080/device/getDeviceList',
+        method:'post',
+        response: {
+            countName: 'total'
+            ,dataName: 'data'
+        },
+        title: '设备信息表',
+        limit:8,
+        cellMinWidth:120,
+        autoSort: false,
+        limits:[8,12,16,20],
+        page:{theme:'#01AAED'},
+        id:'EquReload',
+        cols: [[
+            {field:'node', title: '设备节点'},
+            {field:'mac',title:'设备ID',unresize: true},
+            {field:'threshold',  title: '设备阈值' },
+            {field:'createtime',  title: '创建时间' },
+            {field:'time',  title: '报警时间段' },
+            {field:'state', title:'状态', width:85, templet: '#switchTpl', unresize: true,width:120},
+            {fixed: 'right', title:'操作', toolbar: '#Operate',width:200}
+        ]],
+    });
+    //监听搜索事件
+    active = {
+        reload: function(){
+            var demoReload = $('#demoReload');
+            //执行重载
+            table.reload('EquReload', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                ,where: {
+
+                        equName: demoReload.val(),
+                        aid:$('#fringe').val()
+
+                }
+            });
+        }
+    };
+
+
+    //添加设备事件
+    $("#toolAddbtn").click(function () {
+        if(window.innerWidth <= 768) {
+            var index = layer.open({
+                type: 1,
+                title: '绑定设备',
+                offset: 't',
+                area: [document.body.offsetWidth+'px' ,document.body.offsetHeight+'px'],
+                fixed: false, //不固定
+                content: $("#add-data"),
+                success:function(index){
+                    $("#area").val($("#fringe").find("option:selected").text());
+                    $("#aid").val($("#fringe").val());
+
+
+
+
+                    noBingDevice($("#aid").val());
+
+                    layui.formSelects.data('selectname', 'server', {
+                        url: "http://127.0.0.1:8080/user/getSelectUser?aid="+$("#aid").val()
+                    });
+
+                },
+                end:function () {
+                    $("#area").val(null);
+                    $("#aid").val(null);
+
+                }
+
+            });
+            layer.full(index);
+        } else {
+
+            var index = layer.open({
+                type: 1,
+                title: '绑定设备',
+                area: ['700px', '500px'],
+                fixed: false, //不固定
+                content: $("#add-data"),
+                success:function(index){
+                    $("#area").val($("#fringe").find("option:selected").text());
+                    $("#aid").val($("#fringe").val());
+                    noBingDevice($("#aid").val());
+                    layui.formSelects.data('selectname', 'server', {
+                        url: "http://127.0.0.1:8080/user/getSelectUser?aid="+$("#aid").val()
+                    });
+
+
+
+                },
+                end:function () {
+                    $("#area").val(null);
+                    $("#aid").val(null);
+
+                }
+            });
+
+
+        }
+
+    })
+    //根据aid获取未绑定信息
+    function noBingDevice(aid){
+        $.ajax({
+            url:'http://127.0.0.1:8080/device/getSelectDevice',
+            dataType:'json',
+            data:{ "aid": aid},
+            method:'POST',
+            success:function(resp){
+                console.log(resp)
+                $("#equ-id").empty();
+                $.each(resp, function (index, item) {
+                    $('#equ-id').append(new Option(item.node, item.mac));// 下拉菜单里添加元素
+
+                });
+                layui.form.render("select");
+
+
+            }
+        })
+
+    }
+
+
+    $('.SearchTable .layui-btn').on('click', function(){
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+    });
+
+    //监听行工具事件
+    table.on('tool(equ-info)', function(obj){
+        var data = obj.data;
+
+        if(obj.event === 'del'){
+            layer.confirm('确定删除这台设备吗？', function(index){  //删除设备 并向服务器发送信息
+                $.ajax({
+                    type: 'POST',
+                    url:'http://127.0.0.1:8080/device/deleteDevice',
+                    dataType:'json',
+                    data:obj.data,
+                    success:function(){
+                        table.reload('EquReload');
+                    }
+                });
+                layer.close(index);
+            });
+        } else if(obj.event === 'edit'){  //修改设备信息 并向服务器发送信息
+            console.log(JSON.stringify(data.field));
+            //请求返回值赋给formselect
+            if(window.innerWidth <= 768) {
+                var index = layer.open({
+                    type: 1,
+                    title: '修改设备信息',
+                    offset: 't',
+                    area: [document.body.offsetWidth+'px' ,document.body.offsetHeight+'px'],
+                    fixed: false, //不固定
+                    content:$("#edit-data"),
+                    //弹层创建成功
+                    success: function(){
+                        $("#node").val(data.node);
+                        $("#mac").val(data.mac);
+                        $("#oldthreshold").val(data.threshold);
+                        $("#threshold").val(data.threshold);
+                        $("#equ-warning-scope2").val(data.time);
+                        layui.formSelects.data('selectname2', 'server', {
+                            url: "http://127.0.0.1:8080/user/getSelectUser?aid="+data.aid+"&mac="+$("#mac").val()
+                        });
+
+
+
+                    },
+                    //弹层销毁
+                    end:function() {
+                        $("#node").val(null);
+                        $("#mac").val(null);
+                        $("#threshold").val(null);
+                        $("#equ-warning-scope2").val(null);
+                    }
+                })
+                layer.full(index);
+            }else {
+                var index = layer.open({
+                    type: 1,
+                    title: '修改设备信息',
+                    area: ['700px', '450px'],
+                    fixed: false, //不固定
+                    content:$("#edit-data"),
+                    success: function(layero, index){
+                        $("#node").val(data.node);
+                        $("#mac").val(data.mac);
+                        $("#oldthreshold").val(data.threshold);
+                        $("#threshold").val(data.threshold);
+                        $("#equ-warning-scope2").val(data.time);
+                        layui.formSelects.data('selectname2', 'server', {
+                            url: "http://127.0.0.1:8080/user/getSelectUser?aid="+data.aid+"&mac="+$("#mac").val()
+                        });
+
+                    },
+                    //弹层销毁
+                    end:function () {
+                        $("#node").val(null);
+                        $("#mac").val(null);
+                        $("#threshold").val(null);
+                        $("#equ-warning-scope2").val(null);
+                    }
+                });
+
+            }
+        }
+    });
+
+</script>
+</body>
+
+</html>

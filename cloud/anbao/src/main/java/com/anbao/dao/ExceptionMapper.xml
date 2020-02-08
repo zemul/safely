@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.anbao.dao.ExceptionMapper" >
+  <resultMap id="BaseResultMap" type="com.anbao.pojo.Exception" >
+    <id column="eid" property="eid" jdbcType="VARCHAR" />
+    <result column="inittime" property="inittime" jdbcType="VARCHAR" />
+    <result column="continuetime" property="continuetime" jdbcType="VARCHAR" />
+    <result column="videourl" property="videourl" jdbcType="VARCHAR" />
+    <result column="mac" property="mac" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="getDeviceExceptionNumMonth"  parameterType="java.lang.String" resultType="java.lang.Integer">
+    SELECT count(*) FROM exception where mac=#{mac} AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= date(inittime)
+  </select>
+  <select id="countExceptionSumByAid" resultType="java.lang.Integer">
+    select count(*) from exception where mac in (select mac from monitored where aid=#{aid});
+  </select>
+
+
+
+
+
+  <select id="selectKeyByExample" resultType="com.anbao.pojo.Exception">
+      select eid,inittime,continuetime,aid,node,m.mac,videourl from exception e,monitored m where e.mac=m.mac
+    <if test="aid!= null and aid!=''" >
+       and aid=#{aid}
+    </if>
+    <if test='day1!= null and day2!=null' >
+      AND DATE(inittime) between #{day1} and #{day2}
+    </if>
+
+
+
+  </select>
+
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    eid, inittime, continuetime, videourl, mac
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.anbao.pojo.ExceptionExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from exception
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from exception
+    where eid = #{eid,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from exception
+    where eid = #{eid,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.anbao.pojo.ExceptionExample" >
+    delete from exception
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.anbao.pojo.Exception" >
+    insert into exception (eid, inittime, continuetime, 
+      videourl, mac)
+    values (#{eid,jdbcType=VARCHAR}, #{inittime,jdbcType=VARCHAR}, #{continuetime,jdbcType=VARCHAR}, 
+      #{videourl,jdbcType=VARCHAR}, #{mac,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.anbao.pojo.Exception" >
+    insert into exception
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="eid != null" >
+        eid,
+      </if>
+      <if test="inittime != null" >
+        inittime,
+      </if>
+      <if test="continuetime != null" >
+        continuetime,
+      </if>
+      <if test="videourl != null" >
+        videourl,
+      </if>
+      <if test="mac != null" >
+        mac,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="eid != null" >
+        #{eid,jdbcType=VARCHAR},
+      </if>
+      <if test="inittime != null" >
+        #{inittime,jdbcType=VARCHAR},
+      </if>
+      <if test="continuetime != null" >
+        #{continuetime,jdbcType=VARCHAR},
+      </if>
+      <if test="videourl != null" >
+        #{videourl,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null" >
+        #{mac,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.anbao.pojo.ExceptionExample" resultType="java.lang.Integer" >
+    select count(*) from exception
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update exception
+    <set >
+      <if test="record.eid != null" >
+        eid = #{record.eid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.inittime != null" >
+        inittime = #{record.inittime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.continuetime != null" >
+        continuetime = #{record.continuetime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.videourl != null" >
+        videourl = #{record.videourl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mac != null" >
+        mac = #{record.mac,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update exception
+    set eid = #{record.eid,jdbcType=VARCHAR},
+      inittime = #{record.inittime,jdbcType=VARCHAR},
+      continuetime = #{record.continuetime,jdbcType=VARCHAR},
+      videourl = #{record.videourl,jdbcType=VARCHAR},
+      mac = #{record.mac,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.anbao.pojo.Exception" >
+    update exception
+    <set >
+      <if test="inittime != null" >
+        inittime = #{inittime,jdbcType=VARCHAR},
+      </if>
+      <if test="continuetime != null" >
+        continuetime = #{continuetime,jdbcType=VARCHAR},
+      </if>
+      <if test="videourl != null" >
+        videourl = #{videourl,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null" >
+        mac = #{mac,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where eid = #{eid,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.anbao.pojo.Exception" >
+    update exception
+    set inittime = #{inittime,jdbcType=VARCHAR},
+      continuetime = #{continuetime,jdbcType=VARCHAR},
+      videourl = #{videourl,jdbcType=VARCHAR},
+      mac = #{mac,jdbcType=VARCHAR}
+    where eid = #{eid,jdbcType=VARCHAR}
+  </update>
+</mapper>

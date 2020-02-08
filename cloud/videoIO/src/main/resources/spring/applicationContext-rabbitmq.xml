@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/rabbit
+     http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd">
+
+
+	<!--配置 connection-factory，指定连接 rabbit server 参数 -->
+	<rabbit:connection-factory id="connectionFactory"  username="hadoop" password="hadoop"
+							   host="192.168.25.100"
+							   port="5672"
+							   virtual-host="/"/>
+
+	<bean id="rabbitConnectionFactory"
+		  class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+		<property name="host" value="192.168.25.100"/>
+		<property name="username" value="hadoop"/>
+		<property name="password" value="hadoop"/>
+		<property name="port" value="5672"/>
+		<property name="virtualHost" value="/"/>
+		<property name="channelCacheSize" value="5"/>
+		<property name="publisherConfirms" value="true"/>
+	</bean>
+
+	<!--通过指定下面的 admin 信息，当前 producer 中的 exchange 和 queue 会在 rabbitmq 服务器上自动生成 -->
+	<rabbit:admin connection-factory="connectionFactory"/>
+
+
+	<!--
+        这里是两个 queue 的定义
+        exclusive：排他，该队列仅对首次声明它的连接可见，并在连接断开时自动删除
+        Auto-delete: 自动删除，如果该队列没有任何订阅的消费者的话，该队列会被自动删除。这种队列适用于临时队列。
+        Durable: 持久化
+    -->
+	<rabbit:queue id="queue" name="queue" durable="true" auto-delete="false" exclusive="false"/>
+	<rabbit:queue id="queue2" name="queue2" durable="true" auto-delete="false" exclusive="false"/>
+
+	<!--RabbitMQ 的 Consumer-->
+	<bean id="messageReceiver" class="com.anbao.rabbitmq.MessageConsumer"></bean>
+	<!--<bean id="messageReceiver2" class="com.anbao.rabbitmq.MessageConsumerQueue2"></bean>-->
+
+	<rabbit:listener-container connection-factory="connectionFactory" acknowledge="manual" concurrency="1"
+							   prefetch="5">
+		<rabbit:listener queues="queue" ref="messageReceiver"/>
+	</rabbit:listener-container>
+
+
+
+
+	<!-- 两种 Exchange 的定义 -->
+	<rabbit:direct-exchange name="order" durable="true" auto-delete="false">
+		<rabbit:bindings>
+			<rabbit:binding queue="queue" key="queue"></rabbit:binding>
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+	<rabbit:direct-exchange name="exchange" durable="true" auto-delete="false">
+		<rabbit:bindings>
+			<rabbit:binding queue="queue2" key="exchange"></rabbit:binding>
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
+
+
+	<!--定义是否使用序列化传输-->
+	<bean id="jsonMessageConverter"
+	class="org.springframework.amqp.support.converter.Jackson2JsonMessageConverter"></bean>
+	<!--message-converter="jsonMessageConverter"-->
+
+	<!--定义 rabbit template 用于数据的发送 -->
+	<rabbit:template id="amqpTemplate" connection-factory="connectionFactory"
+					 exchange="exchange" routing-key="exchange"/>
+	<rabbit:template id="amqpTemplate2" connection-factory="connectionFactory"
+					 exchange="order" routing-key="order"/>
+
+
+
+
+
+	<bean id="amqpTemplate3"
+		  class="org.springframework.amqp.rabbit.core.RabbitTemplate">
+		<property name="connectionFactory" ref="rabbitConnectionFactory"/>
+		<property name="confirmCallback" ref="confirmCallBackListener"/>
+		<property name="returnCallback" ref="returnCallBackListener"/>
+		<property name="mandatory" value="true"/>
+		<!--只有在关闭事务的情况下 mandatory 才起作用-->
+		<property name="channelTransacted" value="false"/>
+		<property name="exchange" value="message"/>
+	</bean>
+	<!--发送确认监听-->
+	<bean id="confirmCallBackListener" class="com.anbao.rabbitmq.ConfirmCallBackListener"/>
+	<bean id="returnCallBackListener" class="com.anbao.rabbitmq.ReturnCallBackListener"/>
+
+
+
+</beans>

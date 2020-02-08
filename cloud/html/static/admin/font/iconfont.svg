@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<!--
+2013-9-30: Created.
+-->
+<svg>
+<metadata>
+Created by iconfont
+</metadata>
+<defs>
+
+<font id="iconfont" horiz-adv-x="1024" >
+  <font-face
+    font-family="iconfont"
+    font-weight="500"
+    font-stretch="normal"
+    units-per-em="1024"
+    ascent="896"
+    descent="-128"
+  />
+    <missing-glyph />
+    
+    <glyph glyph-name="xiaoxi" unicode="&#58919;" d="M909 155.51H476.767l-193.18-193.18a33.851 33.851 0 0 0-7.75-5.8 29.819 29.819 0 0 0-14.966-4.03c-0.661 0-1.308 0.057-1.958 0.1-0.253 0.012-0.506 0.02-0.759 0.038-0.3 0.028-0.6 0.066-0.9 0.1a28.664 28.664 0 0 0-17.48 8.2 28.252 28.252 0 0 0-4.944 6.714 29.82 29.82 0 0 0-3.959 14.848V155.51H115a50 50 0 0 0-50 50v560a50 50 0 0 0 50 50h794a50 50 0 0 0 50-50v-560a50 50 0 0 0-50-50zM899 735.5a20 20 0 0 1-20 20H145a20 20 0 0 1-20-20v-500a20 20 0 0 1 20-20h146.08v-59.99h-0.209v-101.043L391.914 155.51h-0.089l59.365 59.99H879a20 20 0 0 1 20 20v500z m-196-296a45 45 0 1 0 45 45 45 45 0 0 0-45-45z m-182 1a45 45 0 1 0 45 45 45 45 0 0 0-45-45z m-182-1a45 45 0 1 0 45 45 45 45 0 0 0-45-45z"  horiz-adv-x="1024" />
+
+    
+
+
+  </font>
+</defs></svg>
