@@ -61,7 +61,7 @@ Mako==1.0.9
 Markdown==2.6.9
 MarkupSafe==1.1.1
 matplotlib==3.0.3
-mistune==0.7.4
+mistune==0.8.1
 mmdnn==0.2.5
 moviepy==1.0.0
 msgpack==0.6.1
