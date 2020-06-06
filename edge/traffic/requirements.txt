@@ -14,7 +14,7 @@ cupy==4.1.0
 cycler==0.10.0
 Cython==0.26
 decorator==4.4.0
-Django==1.9.5
+Django==1.11.29
 dlib==19.17.0
 easydict==1.9
 entrypoints==0.2.3
