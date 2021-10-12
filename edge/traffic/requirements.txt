@@ -74,7 +74,7 @@ notebook==5.0.0
 numpy==1.16.2
 olefile==0.44
 opencv-contrib-python==3.4.2.17
-opencv-python==3.4.2.17
+opencv-python==4.2.0.32
 packaging==19.0
 pandas==0.24.2
 pandocfilters==1.4.2
