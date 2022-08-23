@@ -4,7 +4,7 @@ kafka-python==1.4.6
 kazoo==2.5.0
 kiwisolver==1.1.0
 matplotlib==3.0.3
-numpy==1.15.4+mkl
+numpy==1.22.0
 pandas==0.24.2
 patsy==0.5.1
 pika==1.0.1
