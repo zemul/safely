@@ -85,7 +85,7 @@ Pillow==6.0.0
 plotly==3.8.0
 proglog==0.1.9
 prompt-toolkit==1.0.15
-protobuf==3.6.0
+protobuf==3.18.3
 ptyprocess==0.5.2
 pycparser==2.18
 pycrypto==2.6.1
