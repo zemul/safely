@@ -30,7 +30,7 @@ gast==0.2.0
 gevent==1.2.2
 gevent-websocket==0.10.1
 greenlet==0.4.12
-grpcio==1.12.1
+grpcio==1.53.0
 h5py==2.9.0
 html5lib==0.9999999
 idna==2.8
