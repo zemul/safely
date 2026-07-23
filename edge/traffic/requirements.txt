@@ -52,7 +52,7 @@ Pillow==12.3.0
 opencv-python==4.9.0.80
 opencv-contrib-python==4.9.0.80
 imageio==2.33.1
-moviepy==1.0.3
+moviepy==2.2.1
 imutils==0.5.4
 
 # Deep learning
