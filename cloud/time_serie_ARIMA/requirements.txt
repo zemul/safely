@@ -1,6 +1,6 @@
 cycler==0.12.1
 Cython==3.0.8
-kafka-python==2.0.2
+kafka-python==3.0.9
 kazoo==2.9.0
 kiwisolver==1.4.5
 matplotlib==3.7.5
