@@ -13,7 +13,7 @@
 		<mybatis.paginator.version>1.2.17</mybatis.paginator.version>
 		<mysql.version>5.1.49</mysql.version>
 		<slf4j.version>1.6.4</slf4j.version>
-		<jackson.version>2.13.5</jackson.version>
+		<jackson.version>2.18.9</jackson.version>
 		<druid.version>1.0.9</druid.version>
 		<httpclient.version>4.5.14</httpclient.version>
 		<jstl.version>1.2</jstl.version>
