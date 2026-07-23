@@ -14,7 +14,7 @@ gevent==23.9.1
 greenlet==3.0.3
 python-engineio==4.8.0
 python-socketio==5.10.0
-tornado==6.5.1
+tornado==6.5.7
 websocket-client==1.7.0
 
 # HTTP / requests
