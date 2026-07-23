@@ -19,7 +19,7 @@ websocket-client==1.7.0
 
 # HTTP / requests
 requests==2.31.0
-urllib3==2.1.0
+urllib3==2.7.0
 certifi==2024.7.4
 idna==3.18
 chardet==5.2.0
