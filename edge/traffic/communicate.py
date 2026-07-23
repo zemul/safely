@@ -1,10 +1,17 @@
 import requests
 import json
 import numpy as np
+import os
+import hmac
+import hashlib
 import config
 from config import MQ
 import pika
 import time
+
+DEVICE_API_KEY = os.environ.get("DEVICE_API_KEY", "dev-unsafe-default-key")
+MQ_SECRET = os.environ.get("MQ_SIGNING_SECRET", DEVICE_API_KEY)
+_api_headers = {"X-API-KEY": DEVICE_API_KEY}
 
 # rabbitMQ
 credentials = pika.PlainCredentials(MQ['userName'], MQ['password'])
@@ -22,14 +29,14 @@ def up_video(video_path,deviceID, inittime, continuetime):
     data['inittime'] = inittime
     data['continuetime'] = continuetime
     data['mac'] = deviceID
-    r = requests.post(config.upVideo, data=data,files=files)
+    r = requests.post(config.upVideo, data=data, files=files, headers=_api_headers)
     print(r.text)
 
 
 # 上传图片
 def up_image(img_path):
     files = {'file': open(img_path, 'rb')}
-    requests.post(config.upImage, files=files)
+    requests.post(config.upImage, files=files, headers=_api_headers)
 
 
 # 设备登录与退出
@@ -38,7 +45,7 @@ def deviceState(equip_id, flag):
         data = dict()
         data['id'] = equip_id
         data['flag'] = flag
-        r = requests.post(config.DeviceState, data=data)
+        r = requests.post(config.DeviceState, data=data, headers=_api_headers)
         result = r.text
         print("threshold is"+result)
     except Exception as e:
@@ -56,7 +63,7 @@ def up_statistic(equip_id, numberList):
     data['avg'] = str(np.mean(numberList))
     data['variance'] = str(np.var(numberList))
     data['center'] = str(np.median(numberList))
-    r = requests.post(config.UpIntervals, data=data)
+    r = requests.post(config.UpIntervals, data=data, headers=_api_headers)
     print(r.text)
 
 
@@ -80,14 +87,27 @@ def change_device():
 
 # 回调函数
 def callback(ch, method, properties, body):
-    from device import changeThreshold,changeIsUpImage
-    # from demo import alter_device, changeThreshold
-    result = str.split(body.decode('utf-8'))
-    # 修改阈值
+    from device import changeThreshold, changeIsUpImage
+    msg = body.decode('utf-8')
+
+    # 验证签名（如果消息包含 | 分隔符）
+    if '|' in msg:
+        parts = msg.rsplit('|', 1)
+        payload = parts[0]
+        signature = parts[1]
+        expected = hmac.new(MQ_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(signature, expected):
+            print("[SECURITY] Invalid MQ message signature, dropping")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            return
+        result = str.split(payload)
+    else:
+        # 向后兼容：无签名消息（过渡期）
+        result = str.split(msg)
+
     print(result)
     if result[0] == '0':
         changeThreshold(result[1], result[2])
-    # 返回图片
     elif result[0] == '1':
         changeIsUpImage(result[1])
 
@@ -96,12 +116,12 @@ def callback(ch, method, properties, body):
 
 # 超过阈值后上传人头数
 def realtime_upload(deviceID, number):
-    # temp = deviceID + " " + number + " " + time.strftime("%H%M%S")
-    temp = deviceID + " " + str(number)
-    upStr = bytes(temp, encoding="utf8")
+    payload = deviceID + " " + str(number)
+    # HMAC-SHA256 签名
+    signature = hmac.new(MQ_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    # 格式: payload|signature
+    signed_msg = payload + "|" + signature
     channel = producer.channel()
     channel.basic_publish(exchange="order",
                           routing_key='queue',
-                          body=bytes(upStr))
-
-    # connection.close()
+                          body=signed_msg.encode('utf-8'))

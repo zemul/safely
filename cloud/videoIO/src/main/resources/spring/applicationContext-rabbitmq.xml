@@ -10,18 +10,18 @@
 
 
 	<!--配置 connection-factory，指定连接 rabbit server 参数 -->
-	<rabbit:connection-factory id="connectionFactory"  username="hadoop" password="hadoop"
-							   host="192.168.25.100"
-							   port="5672"
-							   virtual-host="/"/>
+	<rabbit:connection-factory id="connectionFactory"  username="${rabbitmq.username}" password="${rabbitmq.password}"
+							   host="${rabbitmq.host}"
+							   port="${rabbitmq.port}"
+							   virtual-host="${rabbitmq.vhost}"/>
 
 	<bean id="rabbitConnectionFactory"
 		  class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
-		<property name="host" value="192.168.25.100"/>
-		<property name="username" value="hadoop"/>
-		<property name="password" value="hadoop"/>
-		<property name="port" value="5672"/>
-		<property name="virtualHost" value="/"/>
+		<property name="host" value="${rabbitmq.host}"/>
+		<property name="username" value="${rabbitmq.username}"/>
+		<property name="password" value="${rabbitmq.password}"/>
+		<property name="port" value="${rabbitmq.port}"/>
+		<property name="virtualHost" value="${rabbitmq.vhost}"/>
 		<property name="channelCacheSize" value="5"/>
 		<property name="publisherConfirms" value="true"/>
 	</bean>

@@ -210,6 +210,10 @@
 			}
 
 		});
+		function escapeHtml(str) {
+			if (!str) return '';
+			return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+		}
 		var html="";
 		//获取message
 		$.ajax({
@@ -223,9 +227,9 @@
 					html +="\n" +
 							"<div class=\"message-continer\" >\n" +
 							"\t\t\t<div class=\"text-continer\">\n" +
-							"\t\t\t\t<span>"+ item.text+"</span>\n" +
+							"\t\t\t\t<span>"+ escapeHtml(item.text)+"</span>\n" +
 							"\t\t\t</div>\n" +
-							"\t\t\t<div style=\"float: left;padding-left: 20px;\"  >"+item.time+"</div>\n" +
+							"\t\t\t<div style=\"float: left;padding-left: 20px;\"  >"+escapeHtml(item.time)+"</div>\n" +
 							"\t\t\t<div class=\"border-bottom\"></div>\n" +
 							"\t\t</div>";
 					$('#message-alert').html(html);

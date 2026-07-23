@@ -271,13 +271,13 @@
                 method:'POST',
                 success:function(message){
                     console.log(message);
-                    $("#lay-equ-name").html(message.monitored.node);
-                    $("#lay-equ-mac").html(message.monitored.mac);
-                    $("#lay-equ-createtime").html(message.monitored.createtime);
-                    $("#lay-equ-thr").html(message.monitored.threshold);
-                    $("#peopleNum").html(message.peopleNum);
-                    $("#centeryj").html(parseInt((parseFloat(message.peopleNum)/parseFloat(message.monitored.threshold))*100)+"%");
-                    $("#deviceExceptionNumMonth").html(message.deviceExceptionNumMonth);
+                    $("#lay-equ-name").text(message.monitored.node);
+                    $("#lay-equ-mac").text(message.monitored.mac);
+                    $("#lay-equ-createtime").text(message.monitored.createtime);
+                    $("#lay-equ-thr").text(message.monitored.threshold);
+                    $("#peopleNum").text(message.peopleNum);
+                    $("#centeryj").text(parseInt((parseFloat(message.peopleNum)/parseFloat(message.monitored.threshold))*100)+"%");
+                    $("#deviceExceptionNumMonth").text(message.deviceExceptionNumMonth);
                     $('#lay-equ-manager').html(null);
                     $.each(message.managerList,function (index,item) {
                         $('#lay-equ-manager').append(item.name+" "+item.tel+"</br>");// 添加元素
@@ -428,8 +428,8 @@
                     alert_info=(event.data);//传入数据
                     var center =parseInt((parseFloat(event.data)/parseFloat($("#lay-equ-thr").html()))*100)+"%"
                     Math.round(center);
-                    $("#centeryj").html(center);
-                    $("#peopleNum").html(event.data);
+                    $("#centeryj").text(center);
+                    $("#peopleNum").text(event.data);
 
                 }
                 //连接关闭的回调方法

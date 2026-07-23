@@ -33,6 +33,26 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	
+	<!-- 安全响应头过滤器 -->
+	<filter>
+		<filter-name>SecurityHeadersFilter</filter-name>
+		<filter-class>com.anbao.utils.SecurityHeadersFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>SecurityHeadersFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<!-- CSRF 防护过滤器 -->
+	<filter>
+		<filter-name>CsrfFilter</filter-name>
+		<filter-class>com.anbao.utils.CsrfFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CsrfFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
 	<!-- springmvc的前端控制器 -->
 	<servlet>
 		<servlet-name>anbao</servlet-name>

@@ -3,6 +3,7 @@
 软件杯人流量预测
 '''
 
+import os
 import numpy as np
 from test_stationarity import *
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -13,7 +14,12 @@ import time
 
 #engine = create_engine('mysql+pymysql://root:123@localhost:3306/anbao')
 import pymysql
-db = pymysql.connect("localhost", "root", "123", "anbao")
+db = pymysql.connect(
+    host=os.environ.get("ANBAO_DB_HOST", "localhost"),
+    user=os.environ.get("ANBAO_DB_USERNAME", "root"),
+    password=os.environ.get("ANBAO_DB_PASSWORD", ""),
+    database=os.environ.get("ANBAO_DB_NAME", "anbao")
+)
 
 class ModelDecomp(object):
     def __init__(self,mac, test_size=144):
@@ -26,9 +32,9 @@ class ModelDecomp(object):
 
     def read_data(self,mac):
         sql = '''
-              select time,avg from flowdata where mac='%s' AND time >=(NOW() - interval 100 day)
-              '''%(mac)
-        data = pd.read_sql_query(sql,db)
+              select time,avg from flowdata where mac=%s AND time >=(NOW() - interval 100 day)
+              '''
+        data = pd.read_sql_query(sql, db, params=[mac])
         #时间序列
         data = data.set_index('time')
         data.index = pd.to_datetime(data.index)
@@ -128,19 +134,4 @@ if __name__ == '__main__':
             db.commit()
 
     cursor.close()
-    db.close
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    db.close()

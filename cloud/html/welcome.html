@@ -185,13 +185,13 @@
 		data:{"aid":aid},
 		xhrFields: {withCredentials: true},
 		success:function (response) {
-			$("#equ-online-per2").html(response.peopleSum+" 人");
-			$("#equ-online-per3").html(response.monthExceptionSum+" 次");
+			$("#equ-online-per2").text(response.peopleSum+" 人");
+			$("#equ-online-per3").text(response.monthExceptionSum+" 次");
 
 			if(aid!=null && aid!=""){
-				$("#equ-online-per").html(response.nodeSum +" 个");
+				$("#equ-online-per").text(response.nodeSum +" 个");
 			}else{
-				$("#equ-online-per").html(response.areaSum +" 个");
+				$("#equ-online-per").text(response.areaSum +" 个");
 			}
 
 		}

@@ -15,16 +15,15 @@ import com.anbao.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import com.alibaba.dubbo.common.json.JSONObject;
 import com.anbao.service.UserService;
 import com.anbao.utils.MoblieMessageUtil;
+import com.anbao.utils.PasswordUtil;
 import com.anbao.utils.Result;
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
 @Controller
-@CrossOrigin(origins = {"*"}, maxAge = 3600)
 @RequestMapping(method = RequestMethod.POST)
 public class UserControllor {
 	@Autowired
@@ -156,7 +155,7 @@ public class UserControllor {
 	    User user = userService.getUserByTel(tel);
 	    if(user != null){
 	    	//手机号码存在
-	    	if(user.getTel().equals(tel) && user.getPassword().equals(password)){
+	    	if(user.getTel().equals(tel) && PasswordUtil.verify(password, user.getPassword())){
 	    		//密码正确
 				if(user.getAid()!=null){
 					result.setMsg(user.getAid().toString());
@@ -203,9 +202,9 @@ public class UserControllor {
 	    User user = userService.getUserByTel(tel);
 	    if(user != null){
 	    	//手机号码存在
-	    	if(user.getPassword().equals(password1)){
+	    	if(PasswordUtil.verify(password1, user.getPassword())){
 	    		//密码正确
-	    		user.setPassword(password2);
+	    		user.setPassword(PasswordUtil.hash(password2));
 	    		userService.updatePassword(user);
 	    		result.setStatus(200);
 	    		//用户信息在session域

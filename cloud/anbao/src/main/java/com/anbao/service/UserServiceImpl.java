@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.anbao.dao.AreaMapper;
 import com.anbao.pojo.*;
+import com.anbao.utils.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,9 @@ public class UserServiceImpl implements UserService {
 	private AreaMapper areaMapper;
 
 	public User getUserByTel(String tel) {
-		//创建条件查询对象
+		//麓麓陆篓脤玫录镁虏茅脩炉露脭脧贸
 		UserExample example = new UserExample();
-		//设置查询条件
+		//脡猫脰脙虏茅脩炉脤玫录镁
 		example.createCriteria().andTelEqualTo(tel);
 		List<User> userList = userMapper.selectByExample(example);
 		if(userList!=null && userList.size()>=1){
@@ -35,25 +36,25 @@ public class UserServiceImpl implements UserService {
 		}else return null;
 	}
 
-	//注册用户
+	//脳垄虏谩脫脙禄搂
 	public String updataUser(User user) {
-		//2表示管理员
+		//2卤铆脢戮鹿脺脌铆脭卤
 		userMapper.updateByPrimaryKeySelective(user);
 		return "ok";
 	}
 
-	//查询所有保安，state=2,page=当前页，limit每页显示条数
+	//虏茅脩炉脣霉脫脨卤拢掳虏拢卢state=2,page=碌卤脟掳脪鲁拢卢limit脙驴脪鲁脧脭脢戮脤玫脢媒
 	public DataResult selectAllUser(Integer page, Integer limit,Integer aid,String equName) {
-		//设置分页信息
+		//脡猫脰脙路脰脪鲁脨脜脧垄
 		PageHelper.startPage(page, limit);
-		//执行查询
+		//脰麓脨脨虏茅脩炉
 		List<User> list = userMapper.selectAllUser(aid,equName);
-		//创建一个返回值对象
+		//麓麓陆篓脪禄赂枚路碌禄脴脰碌露脭脧贸
 		DataResult result = new DataResult();
 		result.setData(list);
 		result.setMsg("");
 		result.setCode(0);
-		//取分页结果
+		//脠隆路脰脪鲁陆谩鹿没
 		PageInfo<User> pageInfo = new PageInfo<User>(list);
 		long total = pageInfo.getTotal();
 		result.setTotal(total);
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	
-	//修改资料
+	//脨脼赂脛脳脢脕脧
 	public void updatePassword(User user) {
 		UserExample example = new UserExample();
 		example.createCriteria().andTelEqualTo(user.getTel());
@@ -81,20 +82,23 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void insertUser(User user) {
+		if (user.getPassword() != null) {
+			user.setPassword(PasswordUtil.hash(user.getPassword()));
+		}
 		userMapper.insertSelective(user);
 	}
 
 	@Override
 	public List<manySelect> getSelectUser(Integer aid,String mac) {
-	    //先获取区域的保安，
-        //再获取mac维护的保安，
-        //循环遍历，将mac的保安，选择为select
+	    //脧脠禄帽脠隆脟酶脫貌碌脛卤拢掳虏拢卢
+        //脭脵禄帽脠隆mac脦卢禄陇碌脛卤拢掳虏拢卢
+        //脩颅禄路卤茅脌煤拢卢陆芦mac碌脛卤拢掳虏拢卢脩隆脭帽脦陋select
 
-		//查询区域所有保安
+		//虏茅脩炉脟酶脫貌脣霉脫脨卤拢掳虏
 
 		List<manySelect> users = userMapper.getSelectUser(aid,mac);
 		if(mac!=null){
-			//查询当前设备管理员
+			//虏茅脩炉碌卤脟掳脡猫卤赂鹿脺脌铆脭卤
 			List<manySelect> deviceUsers = userMapper.getSelectDeviceUser(aid,mac);
 			for(manySelect duser :deviceUsers){
 				for(manySelect user : users){
@@ -114,7 +118,7 @@ public class UserServiceImpl implements UserService {
 		example.createCriteria().andTelEqualTo(tel);
 		List<User> users = userMapper.selectByExample(example);
 		User user = users.get(0);
-		user.setPassword(password);
+		user.setPassword(PasswordUtil.hash(password));
 		userMapper.updateByPrimaryKeySelective(user);
 	}
 

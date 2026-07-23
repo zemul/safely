@@ -17,7 +17,7 @@ public class AreaExample {
     }
 
     public void setOrderByClause(String orderByClause) {
-        this.orderByClause = orderByClause;
+        this.orderByClause = com.anbao.utils.SqlSafeUtil.validateOrderBy(orderByClause);
     }
 
     public String getOrderByClause() {

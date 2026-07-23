@@ -12,7 +12,12 @@ import java.io.UnsupportedEncodingException;
 
 public  class MoblieMessageUtil {
     public static void sendmsg(String mobile, String templateParam, String templateCode)  {
-        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAITAccYZmDPpJN", "jnYOFwfX4yidlxKKJ3jf0J4BCQYn13");
+        String accessKeyId = System.getenv("ALIYUN_ACCESS_KEY_ID");
+        String accessKeySecret = System.getenv("ALIYUN_ACCESS_KEY_SECRET");
+        if (accessKeyId == null || accessKeySecret == null) {
+            throw new IllegalStateException("ALIYUN_ACCESS_KEY_ID and ALIYUN_ACCESS_KEY_SECRET environment variables must be set");
+        }
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         IAcsClient client = new DefaultAcsClient(profile);
         CommonRequest request = new CommonRequest();
 

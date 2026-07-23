@@ -20,7 +20,7 @@ import redis.clients.jedis.Jedis;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-@CrossOrigin(origins = {"*"}, maxAge = 3600)
+
 @Controller
 @RequestMapping(method = RequestMethod.POST)
 

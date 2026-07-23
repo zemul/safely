@@ -9,12 +9,10 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class JedisPoolUtils {
-	
+
 	private static JedisPool pool = null;
-	
-	static{
-		
-		//加载配置文件
+
+	static {
 		InputStream in = JedisPoolUtils.class.getClassLoader().getResourceAsStream("redis.properties");
 		Properties pro = new Properties();
 		try {
@@ -22,26 +20,24 @@ public class JedisPoolUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		//获得池子对象
+
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
-		poolConfig.setMaxIdle(Integer.parseInt(pro.get("redis.maxIdle").toString()));//最大闲置个数
-		poolConfig.setMinIdle(Integer.parseInt(pro.get("redis.minIdle").toString()));//最小闲置个数
-		poolConfig.setMaxTotal(Integer.parseInt(pro.get("redis.maxTotal").toString()));//最大连接数
-		pool = new JedisPool(poolConfig,pro.getProperty("redis.url") , Integer.parseInt(pro.get("redis.port").toString()));
+		poolConfig.setMaxIdle(Integer.parseInt(pro.get("redis.maxIdle").toString()));
+		poolConfig.setMinIdle(Integer.parseInt(pro.get("redis.minIdle").toString()));
+		poolConfig.setMaxTotal(Integer.parseInt(pro.get("redis.maxTotal").toString()));
+
+		String host = pro.getProperty("redis.url", "127.0.0.1");
+		int port = Integer.parseInt(pro.getProperty("redis.port", "6379"));
+		String password = pro.getProperty("redis.password");
+
+		if (password != null && !password.trim().isEmpty()) {
+			pool = new JedisPool(poolConfig, host, port, 2000, password);
+		} else {
+			pool = new JedisPool(poolConfig, host, port);
+		}
 	}
 
-	//获得jedis资源的方法
-	public static Jedis getJedis(){
+	public static Jedis getJedis() {
 		return pool.getResource();
 	}
-	
-	public static void main(String[] args) {
-		Jedis jedis = getJedis();
-		System.out.println(jedis.get("0"));
-	}
-	
-	
-	
-	
 }

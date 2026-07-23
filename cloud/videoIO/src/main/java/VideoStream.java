@@ -1,5 +1,6 @@
 package com.anbao.controllor;
 
+import com.anbao.utils.FileUploadUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -24,7 +25,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
-@CrossOrigin(origins = {"*"}, maxAge = 3600)
 public class VideoStream {
     public static String HDFSAddress="hdfs://monitor/video/";
 
@@ -37,9 +37,15 @@ public class VideoStream {
      */
     @RequestMapping("/video")
     public void getSelectUser(String path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        System.out.println(path);
         if(path==null)
             return;
+
+        // 路径穿越防护：禁止 .. 和绝对路径
+        if (!FileUploadUtil.isValidPath(path)) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
         String filename=HDFSAddress+path;
         Configuration config=new Configuration();
         config.addResource("/hadoop/core-site.xml");
@@ -60,8 +66,8 @@ public class VideoStream {
         OutputStream out=resp.getOutputStream();
         if(range==null)
         {
-            filename=path.substring(path.lastIndexOf("/")+1);
-            resp.setHeader("Content-Disposition", "attachment; filename="+filename);
+            String displayName=path.substring(path.lastIndexOf("/")+1);
+            resp.setHeader("Content-Disposition", "attachment; filename="+displayName);
             resp.setContentType("application/octet-stream");
             resp.setContentLength((int)fileLen);
             IOUtils.copyBytes(in, out, fileLen, false);
@@ -120,13 +126,23 @@ public class VideoStream {
                         if(formField){
                             //username=zhangsan
                             String fieldName = item.getFieldName();
-                            String fieldValue = item.getString("UTF-8");/
+                            String fieldValue = item.getString("UTF-8");
                             System.out.println(fieldName+"----"+fieldValue);
 
 
                         }else{
 
-                            String fileName = item.getName();
+                            String rawFileName = item.getName();
+                            String fileName = FileUploadUtil.sanitizeFileName(rawFileName);
+                            if (fileName == null || !FileUploadUtil.isAllowedExtension(fileName, FileUploadUtil.ALLOWED_VIDEO_EXTENSIONS)) {
+                                item.delete();
+                                continue;
+                            }
+                            if (!FileUploadUtil.isWithinSizeLimit(item.getSize(), FileUploadUtil.MAX_VIDEO_SIZE)) {
+                                item.delete();
+                                continue;
+                            }
+
                             InputStream in = item.getInputStream();
                             System.out.println(fileName);
 

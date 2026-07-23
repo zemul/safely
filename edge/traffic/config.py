@@ -1,15 +1,18 @@
-BaseServer = "http://39.108.61.148:8080/"
+import os
+
+BaseServer = os.environ.get("BASE_SERVER", "http://localhost:8080/")
 
 # Redis
-RedisHost = 'localhost'
-RedisPort = '6379'
+RedisHost = os.environ.get("REDIS_HOST", "localhost")
+RedisPort = os.environ.get("REDIS_PORT", "6379")
+RedisPassword = os.environ.get("REDIS_PASSWORD", "")
 
 # MySql
-MysqlHost = "localhost"
-MysqlPort = 3306
-MysqlDb = 'py3'
-MysqlUserName = 'root'
-MysqlPassword = "root"
+MysqlHost = os.environ.get("MYSQL_HOST", "localhost")
+MysqlPort = int(os.environ.get("MYSQL_PORT", "3306"))
+MysqlDb = os.environ.get("MYSQL_DB", "py3")
+MysqlUserName = os.environ.get("MYSQL_USERNAME", "root")
+MysqlPassword = os.environ.get("MYSQL_PASSWORD", "")
 
 # 每隔一段时间上传统计数据
 UpIntervals = BaseServer + "normalup/"
@@ -21,15 +24,8 @@ upImage = BaseServer + "device/getImage/"
 upVideo = BaseServer + "uploadVideo/"
 
 MQ = {
-    "userName":"hadoop",
-    "password":"hadoop",
-    "host":"39.108.61.148",
-    "port":5672
+    "userName": os.environ.get("RABBITMQ_USERNAME", "guest"),
+    "password": os.environ.get("RABBITMQ_PASSWORD", ""),
+    "host": os.environ.get("RABBITMQ_HOST", "localhost"),
+    "port": int(os.environ.get("RABBITMQ_PORT", "5672"))
 }
-
-# MQ = {
-#     "userName": "admin",
-#     "password": "admin",
-#     "host": "127.0.0.1",
-#     "port": 5672
-# }

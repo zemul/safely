@@ -24,7 +24,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
-@CrossOrigin(origins = {"*"}, maxAge = 3600)
+
 public class VideoStream {
     public static String HDFSAddress="hdfs://monitor/video/";
 

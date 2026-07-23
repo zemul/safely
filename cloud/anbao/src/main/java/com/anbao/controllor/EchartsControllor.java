@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@CrossOrigin(origins = {"*"}, maxAge = 3600)
+
 @RequestMapping(method = RequestMethod.POST)
 public class EchartsControllor  {
     @Autowired

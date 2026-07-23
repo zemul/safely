@@ -18,6 +18,7 @@ import com.anbao.rabbitmq.MessageConsumer;
 import com.anbao.rabbitmq.sendFanoutGb;
 import com.anbao.service.UserService;
 import com.anbao.service.UserServiceImpl;
+import com.anbao.utils.FileUploadUtil;
 import com.anbao.utils.JedisPoolUtils;
 import com.anbao.utils.MoblieMessageUtil;
 import com.anbao.utils.Result;
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.*;
 import com.anbao.service.DeviceService;
 import redis.clients.jedis.Jedis;
 
-@CrossOrigin(origins = {"*"}, maxAge = 3600)
 @RequestMapping(method = RequestMethod.POST)
 @Controller
 public class DeviceControllor {
@@ -281,8 +281,16 @@ public class DeviceControllor {
 						if(!formField){
 							//文件上传项
 							//文件的名
-							String fileName = item.getName();
-							System.out.println(fileName);
+							String rawFileName = item.getName();
+							String fileName = FileUploadUtil.sanitizeFileName(rawFileName);
+							if (fileName == null || !FileUploadUtil.isAllowedExtension(fileName, FileUploadUtil.ALLOWED_IMAGE_EXTENSIONS)) {
+								item.delete();
+								continue;
+							}
+							if (!FileUploadUtil.isWithinSizeLimit(item.getSize(), FileUploadUtil.MAX_IMAGE_SIZE)) {
+								item.delete();
+								continue;
+							}
 							//获得上传文件的内容
 							InputStream in = item.getInputStream();
 							OutputStream out = new FileOutputStream(new File(servletContext.getRealPath("images/image/"+fileName)));
