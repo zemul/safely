@@ -57,7 +57,7 @@ imutils==0.5.4
 
 # Deep learning
 Keras==2.15.0
-torch==2.1.2
+torch==2.13.0
 torchvision==0.16.2
 tflearn==0.3.2
 h5py==3.10.0
