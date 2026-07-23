@@ -48,7 +48,7 @@ scikit-image==0.21.0
 matplotlib==3.7.5
 
 # Image / video processing
-Pillow==11.1.0
+Pillow==12.3.0
 opencv-python==4.9.0.80
 opencv-contrib-python==4.9.0.80
 imageio==2.33.1
@@ -78,4 +78,4 @@ python-dateutil==2.8.2
 pytz==2024.1
 cycler==0.12.1
 kiwisolver==1.4.5
-mistune==3.1.0
+mistune==3.3.4
