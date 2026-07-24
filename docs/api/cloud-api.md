@@ -193,7 +193,7 @@ Base URL: `http://{host}:8080`
 
 ---
 
-## 视频模块（videoIO 独立部署）
+## 视频模块
 
 ### GET /video
 

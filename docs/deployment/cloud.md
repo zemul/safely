@@ -83,25 +83,11 @@ mvn clean package -DskipTests
 # 产物: target/boss.war
 ```
 
-## 6. 构建 videoIO 模块
+## 6. 部署到 Tomcat
 
 ```bash
-cd cloud/videoIO
-mvn clean package -DskipTests
-# 产物: target/boss.war（建议重命名为 videoIO.war）
-```
-
-## 7. 部署到 Tomcat
-
-```bash
-# 建议 anbao 和 videoIO 分别部署到不同 Tomcat 实例
-# 避免视频流量影响正常业务
-
-# anbao
+# anbao 已包含视频模块，只需部署一个 WAR
 cp cloud/anbao/target/boss.war $TOMCAT_HOME/webapps/ROOT.war
-
-# videoIO（独立 Tomcat）
-cp cloud/videoIO/target/boss.war $TOMCAT_VIDEO/webapps/ROOT.war
 ```
 
 Tomcat 启动前设置环境变量：
