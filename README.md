@@ -2,6 +2,53 @@
 
 基于云边协同架构的实时人流量监控系统。边缘端通过深度学习实时分析摄像头视频流，估计人群密度并检测人头数量；云端汇聚多设备数据，提供预警通知、历史回放和 Prophet 时序预测。
 
+## 系统架构
+
+```mermaid
+graph TB
+    subgraph 用户终端
+        Browser[浏览器]
+        Mobile[手机短信]
+    end
+
+    subgraph 云端
+        subgraph anbao[anbao 统一后台]
+            API[REST API]
+            WS[WebSocket 推送]
+            Scheduler[Prophet 定时预测]
+        end
+        MySQL[(MySQL)]
+        Redis[(Redis)]
+        RabbitMQ{{RabbitMQ}}
+        MinIO[(MinIO / S3)]
+    end
+
+    subgraph 边缘端
+        Camera[摄像头]
+        CSRNet[CSRNet 密度估计]
+        FCHD[FCHD 人头检测]
+        Device[Device 进程]
+    end
+
+    Browser -->|HTTP| API
+    Browser -.->|WebSocket| WS
+    API -->|短信预警| Mobile
+
+    API --- MySQL
+    API --- Redis
+    API --- MinIO
+    WS --- RabbitMQ
+    Scheduler --- MySQL
+
+    Device -->|"HTTP + X-API-KEY"| API
+    Device -->|"MQ + HMAC 签名"| RabbitMQ
+    RabbitMQ -->|"指令下发"| Device
+
+    Camera --> Device
+    Device --> CSRNet
+    Device --> FCHD
+```
+
 ## 核心能力
 
 ### 人群检测（边缘端实时推理）
