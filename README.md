@@ -26,14 +26,16 @@
          上传云端    触发短信预警
 ```
 
-### 流量预测（云端 ARIMA）
+### 流量预测（云端 Prophet）
 
 基于历史人流量数据进行时序预测：
 
-1. **数据预处理** — 消除毛刺（差分序列中剔除异常变化值，均值填充）
-2. **周期性分解** — `seasonal_decompose` 加法模型：原始 = 趋势 + 周期 + 残差
-3. **趋势建模** — 对趋势分量做 ARIMA(1,1,3) 拟合
-4. **预测合成** — 预测趋势 + 历史周期均值 = 未来人流量预测（前推 24 小时）
+1. **数据预处理** — IQR 异常值剔除 + 线性插值填充
+2. **模型拟合** — Prophet 自动识别趋势、日周期、周周期、节假日效应
+3. **乘法分解** — 高峰时段波动更大，乘法模型更符合人流量特征
+4. **预测输出** — 生成未来 24 小时人流量预测（每 10 分钟一个点）
+
+相比传统 ARIMA，Prophet 能自动区分工作日/周末差异，并内置中国节假日效应。
 
 ### 云边协同
 
@@ -86,7 +88,7 @@
 |------|------|
 | 人群密度估计 | CSRNet (Caffe) — 密度图回归 |
 | 人头检测 | FCHD (PyTorch + VGG16) — Faster-RCNN 变体 |
-| 时序预测 | ARIMA + seasonal_decompose (statsmodels) |
+| 时序预测 | Prophet (Meta) — 自动周期/节假日/趋势分解 |
 | 边缘端 | Python 3.8+ / OpenCV / PyTorch / Redis |
 | 云端后台 | Spring MVC 4.3 / MyBatis / MySQL |
 | 消息队列 | RabbitMQ（设备指令 + 实时数据） |
@@ -102,7 +104,7 @@ safely/
 │   ├── anbao/              # 云端业务后台 (Spring MVC + MyBatis)
 │   ├── videoIO/            # 视频接收与存储 (HDFS)
 │   ├── html/               # Web 管理前端
-│   └── time_serie_ARIMA/   # ARIMA 人流量预测
+│   └── time_serie_ARIMA/   # Prophet 人流量预测
 ├── edge/
 │   └── traffic/            # 边缘端检测服务
 │       ├── density/        # 密集场景: CSRNet 密度估计
