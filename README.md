@@ -149,13 +149,12 @@ safely/
 │   ├── anbao/              # 云端业务后台 (Spring MVC + MyBatis)
 │   ├── html/               # Web 管理前端
 │   └── time_serie_ARIMA/   # Prophet 人流量预测
-├── edge/
-│   └── traffic/            # 边缘端检测服务
-│       ├── density/        # 密集场景: CSRNet 密度估计
-│       ├── sparse/         # 稀疏场景: FCHD 人头检测
-│       ├── device.py       # 设备主进程 (采集→检测→上报)
-│       ├── communicate.py  # 云端通信 (HTTP/MQ)
-│       └── server.py       # 启动入口
+├── edge/                   # 边缘端检测服务
+│   ├── density/            # 密集场景: CSRNet 密度估计
+│   ├── sparse/             # 稀疏场景: FCHD 人头检测
+│   ├── device.py           # 设备主进程 (采集→检测→上报)
+│   ├── communicate.py      # 云端通信 (HTTP/MQ)
+│   └── server.py           # 启动入口
 ├── docs/                   # 项目文档
 └── .env.example            # 环境变量模板
 ```
@@ -173,7 +172,7 @@ mvn package -DskipTests
 # 部署 WAR 到 Tomcat
 
 # 3. 边缘端部署
-cd edge/traffic
+cd edge
 pip install -r requirements.txt
 python server.py
 ```

@@ -1,0 +1,32 @@
+version: '3.8'
+
+# 边缘端部署：docker-compose up -d
+# 前置条件：
+#   1. 配置 .env 文件（云端地址、API Key 等）
+#   2. 放置模型文件到 models/ 目录
+#   3. 如需 GPU：安装 nvidia-docker
+
+services:
+
+  edge:
+    build: .
+    restart: always
+    env_file: .env
+    volumes:
+      # 模型文件（不打进镜像，太大）
+      - ./sparse/checkpoints:/app/sparse/checkpoints
+      - ./density:/app/density
+      # 临时视频/截图
+      - ./tempVideo:/app/tempVideo
+      - ./tempImage:/app/tempImage
+    # GPU 支持（如有 NVIDIA GPU 取消注释）
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # USB 摄像头（如使用本地摄像头取消注释）
+    # devices:
+    #   - /dev/video0:/dev/video0

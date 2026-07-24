@@ -22,7 +22,7 @@
 
 ```bash
 # 克隆代码
-cd edge/traffic
+cd edge
 
 # 创建虚拟环境（推荐）
 python3 -m venv venv
@@ -113,7 +113,7 @@ export MQ_SIGNING_SECRET="与云端相同的签名密钥"
 ## 5. 启动服务
 
 ```bash
-cd edge/traffic
+cd edge
 
 # 主检测服务
 python server.py
@@ -159,9 +159,9 @@ After=network.target mysql.service redis.service
 [Service]
 Type=simple
 User=safely
-WorkingDirectory=/opt/safely/edge/traffic
+WorkingDirectory=/opt/safely/edge
 EnvironmentFile=/opt/safely/.env
-ExecStart=/opt/safely/edge/traffic/venv/bin/python server.py
+ExecStart=/opt/safely/edge/venv/bin/python server.py
 Restart=always
 RestartSec=10
 

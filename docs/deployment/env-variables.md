@@ -23,7 +23,7 @@
 | `MQ_SIGNING_SECRET` | 否 | (同 DEVICE_API_KEY) | MQ 消息 HMAC 签名密钥 |
 | `CORS_ALLOWED_ORIGINS` | 否 | `http://localhost:8080,http://localhost:3000` | CORS 允许的前端域名 |
 
-## 边缘端 (edge/traffic)
+## 边缘端 (edge)
 
 | 变量名 | 必填 | 默认值 | 说明 |
 |--------|------|--------|------|
