@@ -2,7 +2,6 @@ package com.anbao.service;
 
 import java.util.List;
 
-import com.alibaba.dubbo.common.json.JSONObject;
 import com.anbao.dao.*;
 import com.anbao.pojo.*;
 import com.anbao.pojo.Exception;
@@ -212,7 +211,6 @@ public class DeviceServiceImpl implements DeviceService {
 		}
 		monitored.setState(flag);
 		monitoredMapper.updateByPrimaryKeySelective(monitored);
-		JSONObject object = new JSONObject();
 
 		return monitored.getThreshold();
 	}
