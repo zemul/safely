@@ -1,4 +1,29 @@
+# 环境变量（含敏感信息）
 .env
 *.env
 .env.*
 !.env.example
+
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/
+*.swp
+
+# Java 构建产物
+target/
+*.class
+*.jar
+*.war
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db

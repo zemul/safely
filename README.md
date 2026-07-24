@@ -100,7 +100,6 @@
 safely/
 ├── cloud/
 │   ├── anbao/              # 云端业务后台 (Spring MVC + MyBatis)
-│   ├── videoIO/            # 视频模块 (已合并进 anbao，保留源码参考)
 │   ├── html/               # Web 管理前端
 │   └── time_serie_ARIMA/   # Prophet 人流量预测
 ├── edge/
