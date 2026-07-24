@@ -27,7 +27,7 @@
 		<jsqlparser.version>0.9.1</jsqlparser.version>
 		<commons-fileupload.version>1.5</commons-fileupload.version>
 		<jedis.version>3.9.0</jedis.version>
-		<solrj.version>7.7.3</solrj.version>
+		<solrj.version>8.11.3</solrj.version>
 		<freemarker.version>2.3.34</freemarker.version>
 		<quartz.version>2.2.2</quartz.version>
 	</properties>
