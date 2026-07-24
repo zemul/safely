@@ -59,7 +59,7 @@ Keras==3.13.2
 torch==2.13.0
 torchvision==0.16.2
 tflearn==0.3.2
-h5py==3.10.0
+h5py==3.16.0
 dlib==19.24.2
 
 # gRPC
