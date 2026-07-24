@@ -35,8 +35,8 @@ public class MessageProducer {
        ConnectionFactory factory = new ConnectionFactory();
         //设置需要连接的RabbitMQ地址，这里指向本机
         factory.setHost("192.168.25.100");
-        factory.setUsername("hadoop");
-        factory.setPassword("hadoop");
+        factory.setUsername(System.getenv("RABBITMQ_USERNAME") != null ? System.getenv("RABBITMQ_USERNAME") : "guest");
+        factory.setPassword(System.getenv("RABBITMQ_PASSWORD") != null ? System.getenv("RABBITMQ_PASSWORD") : "");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
         String message = "drriver aaabbbcc is  died";

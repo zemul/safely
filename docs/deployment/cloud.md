@@ -10,7 +10,7 @@
 | MySQL | 5.7+ | 业务数据库 |
 | Redis | 5.0+ | 实时数据缓存 |
 | RabbitMQ | 3.7+ | 消息队列 |
-| Hadoop HDFS | 2.10+ | 视频存储（videoIO 模块需要） |
+| MinIO / 对象存储 | 最新 | 视频存储（S3 协议，也可用阿里云 OSS） |
 | Python | 3.8+ | ARIMA 预测模块 |
 
 ## 1. 数据库初始化

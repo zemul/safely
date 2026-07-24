@@ -27,8 +27,8 @@ public class sendFanoutGb {
         ConnectionFactory factory = new ConnectionFactory();
         // 设置需要连接的RabbitMQ地址
         factory.setHost("192.168.25.100");
-        factory.setUsername("hadoop");
-        factory.setPassword("hadoop");
+        factory.setUsername(System.getenv("RABBITMQ_USERNAME") != null ? System.getenv("RABBITMQ_USERNAME") : "guest");
+        factory.setPassword(System.getenv("RABBITMQ_PASSWORD") != null ? System.getenv("RABBITMQ_PASSWORD") : "");
 
         String payload = flag + " " + message;
         // HMAC-SHA256 签名
