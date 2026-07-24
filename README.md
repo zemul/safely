@@ -134,11 +134,12 @@ graph TB
 | 人群密度估计 | CSRNet (Caffe) — 密度图回归 |
 | 人头检测 | FCHD (PyTorch + VGG16) — Faster-RCNN 变体 |
 | 时序预测 | Prophet (Meta) — 自动周期/节假日/趋势分解 |
-| 边缘端 | Python 3.8+ / OpenCV / PyTorch / Redis |
-| 云端后台 | Spring MVC 4.3 / MyBatis / MySQL |
-| 消息队列 | RabbitMQ（设备指令 + 实时数据） |
+| 边缘端 | Python 3.8+ / OpenCV / PyTorch |
+| 云端后台 | FastAPI / SQLAlchemy / MySQL |
+| 消息队列 | RabbitMQ (aio-pika) |
 | 视频存储 | S3 协议（MinIO / 阿里云 OSS / AWS S3） |
-| 实时推送 | WebSocket (JSR-356) |
+| 实时推送 | WebSocket (FastAPI native) |
+| 定时任务 | APScheduler |
 | 前端 | Layui + jQuery + ECharts |
 
 ## 项目结构
@@ -146,15 +147,25 @@ graph TB
 ```
 safely/
 ├── cloud/
-│   ├── anbao/              # 云端业务后台 (Spring MVC + MyBatis)
+│   ├── server/             # 云端后台 (FastAPI)
+│   │   ├── main.py         # 入口
+│   │   ├── config.py       # 环境变量配置
+│   │   ├── models.py       # SQLAlchemy ORM
+│   │   ├── database.py     # 异步数据库会话
+│   │   ├── auth.py         # JWT 认证
+│   │   ├── mq.py           # RabbitMQ 收发
+│   │   ├── forecast.py     # Prophet 预测定时任务
+│   │   └── routers/        # API 路由
 │   ├── html/               # Web 管理前端
-│   └── time_serie_ARIMA/   # Prophet 人流量预测
+│   └── Dockerfile
 ├── edge/                   # 边缘端检测服务
 │   ├── density/            # 密集场景: CSRNet 密度估计
 │   ├── sparse/             # 稀疏场景: FCHD 人头检测
 │   ├── device.py           # 设备主进程 (采集→检测→上报)
 │   ├── communicate.py      # 云端通信 (HTTP/MQ)
 │   └── server.py           # 启动入口
+├── db/init.sql             # 数据库初始化
+├── docker-compose.yml      # 一键部署
 ├── docs/                   # 项目文档
 └── .env.example            # 环境变量模板
 ```
@@ -166,12 +177,15 @@ safely/
 cp .env.example .env
 # 编辑 .env 填入实际凭据
 
-# 2. 云端部署
-cd cloud/anbao
-mvn package -DskipTests
-# 部署 WAR 到 Tomcat
+# 2. 一键启动云端（含 MySQL/Redis/RabbitMQ/MinIO/后台服务）
+docker compose up -d
 
-# 3. 边缘端部署
+# 3. 或本地开发运行
+cd cloud/server
+pip install -r requirements.txt
+python main.py
+
+# 4. 边缘端部署
 cd edge
 pip install -r requirements.txt
 python server.py

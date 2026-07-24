@@ -1,20 +1,15 @@
-version: '3.8'
-
-# 云端一键启动：docker-compose up -d
 services:
 
   mysql:
     image: mysql:5.7
     environment:
-      MYSQL_ROOT_PASSWORD: ${ANBAO_DB_PASSWORD:-safely123}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-safely123}
       MYSQL_DATABASE: anbao
-      MYSQL_CHARACTER_SET_SERVER: utf8mb4
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/01_init.sql
-      - ./cloud/anbao/migration:/docker-entrypoint-initdb.d/migrations
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
   redis:
@@ -26,11 +21,11 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-anbao_mq}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-safely123}
+      RABBITMQ_DEFAULT_USER: ${MQ_USER:-anbao_mq}
+      RABBITMQ_DEFAULT_PASS: ${MQ_PASSWORD:-safely123}
     ports:
       - "5672:5672"
-      - "15672:15672"  # 管理界面
+      - "15672:15672"
 
   minio:
     image: minio/minio
@@ -40,45 +35,41 @@ services:
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
     ports:
       - "9000:9000"
-      - "9001:9001"  # 管理界面
+      - "9001:9001"
     volumes:
       - minio_data:/data
 
-  anbao:
-    build: ./cloud/anbao
+  server:
+    build:
+      context: .
+      dockerfile: cloud/Dockerfile
     ports:
-      - "8080:8080"
+      - "8000:8000"
     depends_on:
       - mysql
       - redis
       - rabbitmq
       - minio
     environment:
-      ANBAO_DB_URL: jdbc:mysql://mysql:3306/anbao?characterEncoding=utf-8&useSSL=false
-      ANBAO_DB_USERNAME: root
-      ANBAO_DB_PASSWORD: ${ANBAO_DB_PASSWORD:-safely123}
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:-safely123}
+      DB_NAME: anbao
       REDIS_HOST: redis
       REDIS_PORT: "6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD:-safely123}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: "5672"
-      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-anbao_mq}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-safely123}
+      MQ_HOST: rabbitmq
+      MQ_PORT: "5672"
+      MQ_USER: ${MQ_USER:-anbao_mq}
+      MQ_PASSWORD: ${MQ_PASSWORD:-safely123}
       S3_ENDPOINT: http://minio:9000
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
       S3_BUCKET: safely-videos
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
       DEVICE_API_KEY: ${DEVICE_API_KEY:-dev-unsafe-default-key}
       MQ_SIGNING_SECRET: ${MQ_SIGNING_SECRET:-dev-unsafe-default-key}
-      CORS_ALLOWED_ORIGINS: http://localhost:8080,http://localhost:3000
-      ALIYUN_ACCESS_KEY_ID: ${ALIYUN_ACCESS_KEY_ID:-}
-      ALIYUN_ACCESS_KEY_SECRET: ${ALIYUN_ACCESS_KEY_SECRET:-}
-      PYTHON_CMD: python3
-      FORECAST_SCRIPT_PATH: /opt/forecast/forecast_prophet.py
-      ANBAO_DB_HOST: mysql
-      ANBAO_DB_NAME: anbao
-    volumes:
-      - ./cloud/time_serie_ARIMA:/opt/forecast
 
 volumes:
   mysql_data:

@@ -1,0 +1,13 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy==2.0.35
+aiomysql==0.2.0
+aio-pika==9.4.3
+redis[hiredis]==5.1.1
+boto3==1.35.0
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.9
+prophet==1.1.5
+apscheduler==3.10.4
+pydantic-settings==2.5.2
