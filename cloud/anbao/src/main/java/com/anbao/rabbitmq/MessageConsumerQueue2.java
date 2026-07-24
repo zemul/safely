@@ -2,7 +2,7 @@ package com.anbao.rabbitmq;
 
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 
 public class MessageConsumerQueue2 implements ChannelAwareMessageListener {
     @Override

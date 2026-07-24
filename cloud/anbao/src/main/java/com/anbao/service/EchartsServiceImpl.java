@@ -5,7 +5,6 @@ import com.anbao.dao.MonitoredMapper;
 import com.anbao.pojo.Flowdata;
 import com.anbao.pojo.FlowdataExample;
 import com.anbao.pojo.echaets.areaBarChart;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.anbao.pojo.flow;

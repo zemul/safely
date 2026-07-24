@@ -7,7 +7,7 @@ import com.anbao.pojo.User;
 import com.anbao.service.AreaService;
 import com.anbao.utils.JedisPoolUtils;
 import com.anbao.utils.Result;
-import org.mortbay.util.ajax.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;

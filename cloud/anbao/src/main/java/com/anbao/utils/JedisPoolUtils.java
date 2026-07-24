@@ -26,9 +26,9 @@ public class JedisPoolUtils {
 		poolConfig.setMinIdle(Integer.parseInt(pro.get("redis.minIdle").toString()));
 		poolConfig.setMaxTotal(Integer.parseInt(pro.get("redis.maxTotal").toString()));
 
-		String host = pro.getProperty("redis.url", "127.0.0.1");
-		int port = Integer.parseInt(pro.getProperty("redis.port", "6379"));
-		String password = pro.getProperty("redis.password");
+		String host = System.getenv("REDIS_HOST") != null ? System.getenv("REDIS_HOST") : pro.getProperty("redis.url", "127.0.0.1");
+		int port = Integer.parseInt(System.getenv("REDIS_PORT") != null ? System.getenv("REDIS_PORT") : pro.getProperty("redis.port", "6379"));
+		String password = System.getenv("REDIS_PASSWORD") != null ? System.getenv("REDIS_PASSWORD") : pro.getProperty("redis.password");
 
 		if (password != null && !password.trim().isEmpty()) {
 			pool = new JedisPool(poolConfig, host, port, 2000, password);

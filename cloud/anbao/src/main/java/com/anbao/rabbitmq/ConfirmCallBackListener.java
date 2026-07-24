@@ -1,7 +1,7 @@
 package com.anbao.rabbitmq;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.support.CorrelationData;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 
 /**
  * 无法发送到指定的exchange
@@ -10,7 +10,7 @@ import org.springframework.amqp.rabbit.support.CorrelationData;
 public class ConfirmCallBackListener implements RabbitTemplate.ConfirmCallback {
 
     @Override
-    public void confirm(CorrelationData correlationData, boolean b) {
+    public void confirm(CorrelationData correlationData, boolean b, String cause) {
         if (b) {
 
         } else {

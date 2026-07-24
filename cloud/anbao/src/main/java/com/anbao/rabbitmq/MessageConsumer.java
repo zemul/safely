@@ -3,7 +3,7 @@ package com.anbao.rabbitmq;
 import com.anbao.controllor.WebSocketControllor;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

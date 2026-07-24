@@ -3,7 +3,6 @@ package com.anbao.rabbitmq;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,6 @@ public class MessageProducer {
 
 
 
-    @Test
     public void sendMessage4() throws IOException, TimeoutException {
        ConnectionFactory factory = new ConnectionFactory();
         //设置需要连接的RabbitMQ地址，这里指向本机
