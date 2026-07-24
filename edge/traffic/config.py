@@ -2,11 +2,6 @@ import os
 
 BaseServer = os.environ.get("BASE_SERVER", "http://localhost:8080/")
 
-# Redis
-RedisHost = os.environ.get("REDIS_HOST", "localhost")
-RedisPort = os.environ.get("REDIS_PORT", "6379")
-RedisPassword = os.environ.get("REDIS_PASSWORD", "")
-
 # MySql
 MysqlHost = os.environ.get("MYSQL_HOST", "localhost")
 MysqlPort = int(os.environ.get("MYSQL_PORT", "3306"))
