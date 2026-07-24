@@ -1,0 +1,84 @@
+version: '3.8'
+
+# 云端一键启动：docker-compose up -d
+services:
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ANBAO_DB_PASSWORD:-safely123}
+      MYSQL_DATABASE: anbao
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./cloud/anbao/migration:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD:-safely123}
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-anbao_mq}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-safely123}
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # 管理界面
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # 管理界面
+    volumes:
+      - minio_data:/data
+
+  anbao:
+    build: ./cloud/anbao
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+      - minio
+    environment:
+      ANBAO_DB_URL: jdbc:mysql://mysql:3306/anbao?characterEncoding=utf-8&useSSL=false
+      ANBAO_DB_USERNAME: root
+      ANBAO_DB_PASSWORD: ${ANBAO_DB_PASSWORD:-safely123}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-safely123}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-anbao_mq}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-safely123}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
+      S3_BUCKET: safely-videos
+      DEVICE_API_KEY: ${DEVICE_API_KEY:-dev-unsafe-default-key}
+      MQ_SIGNING_SECRET: ${MQ_SIGNING_SECRET:-dev-unsafe-default-key}
+      CORS_ALLOWED_ORIGINS: http://localhost:8080,http://localhost:3000
+      ALIYUN_ACCESS_KEY_ID: ${ALIYUN_ACCESS_KEY_ID:-}
+      ALIYUN_ACCESS_KEY_SECRET: ${ALIYUN_ACCESS_KEY_SECRET:-}
+      PYTHON_CMD: python3
+      FORECAST_SCRIPT_PATH: /opt/forecast/forecast_prophet.py
+      ANBAO_DB_HOST: mysql
+      ANBAO_DB_NAME: anbao
+    volumes:
+      - ./cloud/time_serie_ARIMA:/opt/forecast
+
+volumes:
+  mysql_data:
+  minio_data:
