@@ -93,7 +93,7 @@ $.ajaxSetup({
 |------|------|
 | MyBatis | 参数化查询 `#{}` |
 | orderByClause | `SqlSafeUtil.validateOrderBy()` 正则白名单 |
-| ARIMA 模块 | `pd.read_sql_query(sql, db, params=[mac])` |
+| Prophet 模块 | `pd.read_sql_query(sql, db, params=[mac])` |
 
 ## CORS 配置
 

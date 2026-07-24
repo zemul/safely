@@ -43,7 +43,7 @@
 | `DEVICE_API_KEY` | **是** | `dev-unsafe-default-key` | 与云端一致的 API Key |
 | `MQ_SIGNING_SECRET` | 否 | (同 DEVICE_API_KEY) | MQ 消息签名密钥 |
 
-## ARIMA 预测模块
+## Prophet 预测模块
 
 | 变量名 | 必填 | 默认值 | 说明 |
 |--------|------|--------|------|

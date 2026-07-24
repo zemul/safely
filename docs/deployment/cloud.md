@@ -11,7 +11,7 @@
 | Redis | 5.0+ | 实时数据缓存 |
 | RabbitMQ | 3.7+ | 消息队列 |
 | MinIO / 对象存储 | 最新 | 视频存储（S3 协议，也可用阿里云 OSS） |
-| Python | 3.8+ | ARIMA 预测模块 |
+| Python | 3.8+ | Prophet 预测模块 |
 
 ## 1. 数据库初始化
 
@@ -113,7 +113,7 @@ export ANBAO_DB_PASSWORD="..."
 # ... 其他变量
 ```
 
-## 8. 部署 ARIMA 预测模块
+## 8. 部署 Prophet 预测模块
 
 ```bash
 cd cloud/time_serie_ARIMA
@@ -125,13 +125,13 @@ export ANBAO_DB_USERNAME="anbao_app"
 export ANBAO_DB_PASSWORD="你的数据库密码"
 
 # 运行（建议通过 crontab 定时执行）
-python decomp_modelsql.py
+python forecast_prophet.py
 ```
 
 Crontab 示例（每天凌晨 2 点执行预测）：
 
 ```cron
-0 2 * * * cd /path/to/cloud/time_serie_ARIMA && /usr/bin/python3 decomp_modelsql.py >> /var/log/arima.log 2>&1
+0 2 * * * cd /path/to/cloud/time_serie_ARIMA && /usr/bin/python3 forecast_prophet.py >> /var/log/forecast.log 2>&1
 ```
 
 ## 9. 密码迁移（首次部署）
