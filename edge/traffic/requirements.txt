@@ -26,7 +26,7 @@ chardet==5.2.0
 
 # Database
 SQLAlchemy==1.4.51
-PyMySQL==1.1.0
+PyMySQL==1.1.1
 redis==5.0.1
 
 # Message queues
