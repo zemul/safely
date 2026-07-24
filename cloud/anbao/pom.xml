@@ -303,6 +303,13 @@
 
 
 
+		<!-- AWS S3 SDK (兼容 MinIO / 阿里云 OSS / AWS S3) -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.12.261</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -115,24 +115,27 @@ export ANBAO_DB_PASSWORD="..."
 
 ## 8. 部署 Prophet 预测模块
 
+预测任务已内置在 anbao 服务中（每天凌晨 2:00 自动执行），只需确保：
+
+1. 服务器安装了 Python 3.8+
+2. 安装预测依赖：
+
 ```bash
 cd cloud/time_serie_ARIMA
 pip install -r requirements.txt
-
-# 设置环境变量
-export ANBAO_DB_HOST="localhost"
-export ANBAO_DB_USERNAME="anbao_app"
-export ANBAO_DB_PASSWORD="你的数据库密码"
-
-# 运行（建议通过 crontab 定时执行）
-python forecast_prophet.py
 ```
 
-Crontab 示例（每天凌晨 2 点执行预测）：
+3. 设置环境变量：
 
-```cron
-0 2 * * * cd /path/to/cloud/time_serie_ARIMA && /usr/bin/python3 forecast_prophet.py >> /var/log/forecast.log 2>&1
+```bash
+export PYTHON_CMD=python3
+export FORECAST_SCRIPT_PATH=/opt/safely/cloud/time_serie_ARIMA/forecast_prophet.py
+export ANBAO_DB_HOST=localhost
+export ANBAO_DB_USERNAME=anbao_app
+export ANBAO_DB_PASSWORD=你的数据库密码
 ```
+
+Tomcat 启动后会自动按 cron 调度预测脚本，无需额外配置 crontab。
 
 ## 9. 密码迁移（首次部署）
 
