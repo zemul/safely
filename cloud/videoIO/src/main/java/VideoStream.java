@@ -1,175 +1,183 @@
 package com.anbao.controllor;
 
 import com.anbao.utils.FileUploadUtil;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.*;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URI;
 import java.util.List;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.springframework.web.bind.annotation.RequestMethod;
-
+/**
+ * 视频存储与播放
+ * 使用 S3 协议，兼容 AWS S3 / 阿里云 OSS / MinIO 等
+ */
 @Controller
 public class VideoStream {
-    public static String HDFSAddress="hdfs://monitor/video/";
+
+    private static final String BUCKET;
+    private static final AmazonS3 s3Client;
+
+    static {
+        String endpoint = System.getenv("S3_ENDPOINT") != null
+                ? System.getenv("S3_ENDPOINT") : "http://localhost:9000";
+        String region = System.getenv("S3_REGION") != null
+                ? System.getenv("S3_REGION") : "us-east-1";
+        String accessKey = System.getenv("S3_ACCESS_KEY") != null
+                ? System.getenv("S3_ACCESS_KEY") : "minioadmin";
+        String secretKey = System.getenv("S3_SECRET_KEY") != null
+                ? System.getenv("S3_SECRET_KEY") : "minioadmin";
+        BUCKET = System.getenv("S3_BUCKET") != null
+                ? System.getenv("S3_BUCKET") : "safely-videos";
+
+        s3Client = AmazonS3ClientBuilder.standard()
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                .withPathStyleAccessEnabled(true)  // MinIO 需要 path-style
+                .withClientConfiguration(new ClientConfiguration().withSignerOverride("AWSS3V4SignerType"))
+                .build();
+
+        // 自动创建 bucket（如果不存在）
+        if (!s3Client.doesBucketExistV2(BUCKET)) {
+            s3Client.createBucket(BUCKET);
+        }
+    }
 
     /**
-     * 视频播放
-     * @param path
-     * @param req
-     * @param resp
-     * @throws IOException
+     * 视频播放（支持 Range 请求）
      */
     @RequestMapping("/video")
-    public void getSelectUser(String path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if(path==null)
-            return;
+    public void playVideo(String path, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (path == null) return;
 
-        // 路径穿越防护：禁止 .. 和绝对路径
         if (!FileUploadUtil.isValidPath(path)) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        String filename=HDFSAddress+path;
-        Configuration config=new Configuration();
-        config.addResource("/hadoop/core-site.xml");
-        config.addResource("/hadoop/hdfs-site.xml");
-        FileSystem fs = null;
-        FSDataInputStream in=null;
+        String key = "video/" + path;
+
+        // 获取文件大小
+        ObjectMetadata metadata;
         try {
-            fs = FileSystem.get(URI.create(filename),config,"hadoop");
-            in=fs.open(new Path(filename));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            metadata = s3Client.getObjectMetadata(BUCKET, key);
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
         }
-        final long fileLen = fs.getFileStatus(new Path(filename)).getLen();
-        String range=req.getHeader("Range");
-        resp.setHeader("Content-type","video/mp4");
-        OutputStream out=resp.getOutputStream();
-        if(range==null)
-        {
-            String displayName=path.substring(path.lastIndexOf("/")+1);
-            resp.setHeader("Content-Disposition", "attachment; filename="+displayName);
+        long fileLen = metadata.getContentLength();
+
+        String range = req.getHeader("Range");
+        OutputStream out = resp.getOutputStream();
+
+        if (range == null) {
+            // 完整下载
+            String displayName = path.contains("/") ? path.substring(path.lastIndexOf("/") + 1) : path;
+            resp.setHeader("Content-Disposition", "attachment; filename=" + displayName);
             resp.setContentType("application/octet-stream");
-            resp.setContentLength((int)fileLen);
-            IOUtils.copyBytes(in, out, fileLen, false);
-        }
-        else
-        {
-            long start=Integer.valueOf(range.substring(range.indexOf("=")+1, range.indexOf("-")));
-            long count=fileLen-start;
-            long end;
-            if(range.endsWith("-"))
-                end=fileLen-1;
-            else
-                end=Integer.valueOf(range.substring(range.indexOf("-")+1));
-            String ContentRange="bytes "+String.valueOf(start)+"-"+end+"/"+String.valueOf(fileLen);
+            resp.setContentLengthLong(fileLen);
+
+            try (S3Object obj = s3Client.getObject(BUCKET, key);
+                 InputStream in = obj.getObjectContent()) {
+                copy(in, out);
+            }
+        } else {
+            // Range 请求（视频拖拽播放）
+            long start = Long.parseLong(range.substring(range.indexOf("=") + 1, range.indexOf("-")));
+            long end = range.endsWith("-") ? fileLen - 1 : Long.parseLong(range.substring(range.indexOf("-") + 1));
+            long count = end - start + 1;
+
             resp.setStatus(206);
-            resp.setContentType("video/mpeg4");
-            resp.setHeader("Content-Range",ContentRange);
-            in.seek(start);
-            try{
-                IOUtils.copyBytes(in, out, count, false);
-            }
-            catch(Exception e)
-            {
-                throw e;
+            resp.setContentType("video/mp4");
+            resp.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + fileLen);
+            resp.setContentLengthLong(count);
+            resp.setHeader("Accept-Ranges", "bytes");
+
+            GetObjectRequest getReq = new GetObjectRequest(BUCKET, key).withRange(start, end);
+            try (S3Object obj = s3Client.getObject(getReq);
+                 InputStream in = obj.getObjectContent()) {
+                copy(in, out);
             }
         }
-        in.close();
-        in = null;
-        out.close();
-        out = null;
+        out.flush();
     }
 
     /**
      * 上传视频
      */
     @RequestMapping("/uploadVideo")
-    public void uploadViedo( HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @ResponseBody
+    public void uploadVideo(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-
             ServletContext servletContext = request.getSession().getServletContext();
-            String path_temp = servletContext.getRealPath("temp");
+            String pathTemp = servletContext.getRealPath("temp");
+            File tempDir = new File(pathTemp);
+            if (!tempDir.exists()) tempDir.mkdirs();
+
             DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setSizeThreshold(1024*1024*10);
-            factory.setRepository(new File(path_temp));
+            factory.setSizeThreshold(1024 * 1024 * 10);
+            factory.setRepository(tempDir);
+
             ServletFileUpload upload = new ServletFileUpload(factory);
             upload.setHeaderEncoding("UTF-8");
-            boolean multipartContent = upload.isMultipartContent(request);
-            if(multipartContent){
-                //是文件上传的表单
-                //***解析request获得文件项集合
-                List<FileItem> parseRequest = upload.parseRequest(request);
-                if(parseRequest!=null){
-                    for(FileItem item : parseRequest){
-                        //判断是不是一个普通表单项
-                        boolean formField = item.isFormField();
-                        if(formField){
-                            //username=zhangsan
-                            String fieldName = item.getFieldName();
-                            String fieldValue = item.getString("UTF-8");
-                            System.out.println(fieldName+"----"+fieldValue);
 
+            if (!upload.isMultipartContent(request)) return;
 
-                        }else{
+            List<FileItem> parseRequest = upload.parseRequest(request);
+            if (parseRequest == null) return;
 
-                            String rawFileName = item.getName();
-                            String fileName = FileUploadUtil.sanitizeFileName(rawFileName);
-                            if (fileName == null || !FileUploadUtil.isAllowedExtension(fileName, FileUploadUtil.ALLOWED_VIDEO_EXTENSIONS)) {
-                                item.delete();
-                                continue;
-                            }
-                            if (!FileUploadUtil.isWithinSizeLimit(item.getSize(), FileUploadUtil.MAX_VIDEO_SIZE)) {
-                                item.delete();
-                                continue;
-                            }
+            for (FileItem item : parseRequest) {
+                if (item.isFormField()) continue;
 
-                            InputStream in = item.getInputStream();
-                            System.out.println(fileName);
-
-                            String filename="/video/"+fileName;
-                            Configuration config=new Configuration();
-                            config.addResource("/hadoop/core-site.xml");
-                            config.addResource("/hadoop/hdfs-site.xml");
-
-                            FileSystem fs = FileSystem.get(config);
-                            OutputStream out = fs.create(new Path(filename));
-                            IOUtils.copyBytes(in, out, 1024*1024*10, true);
-                            item.delete();
-
-                        }
-                    }
+                String rawFileName = item.getName();
+                String fileName = FileUploadUtil.sanitizeFileName(rawFileName);
+                if (fileName == null || !FileUploadUtil.isAllowedExtension(fileName, FileUploadUtil.ALLOWED_VIDEO_EXTENSIONS)) {
+                    item.delete();
+                    continue;
+                }
+                if (!FileUploadUtil.isWithinSizeLimit(item.getSize(), FileUploadUtil.MAX_VIDEO_SIZE)) {
+                    item.delete();
+                    continue;
                 }
 
-            }else{
+                String key = "video/" + fileName;
 
+                // 上传到 S3
+                ObjectMetadata meta = new ObjectMetadata();
+                meta.setContentLength(item.getSize());
+                meta.setContentType("video/mp4");
+
+                try (InputStream in = item.getInputStream()) {
+                    s3Client.putObject(new PutObjectRequest(BUCKET, key, in, meta));
+                }
+
+                item.delete();
             }
         } catch (FileUploadException e) {
             e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
-
     }
 
-
-
+    private static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = in.read(buf)) != -1) {
+            out.write(buf, 0, n);
+        }
+    }
 }

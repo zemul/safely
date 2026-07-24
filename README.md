@@ -67,7 +67,7 @@
 │  └── 下发指令到边缘端 (通过 RabbitMQ)                             │
 │                                                                   │
 │  videoIO (视频模块)                                               │
-│  └── 接收视频文件 → 存储到 HDFS → 提供回放                       │
+│  └── 接收视频文件 → 存储到 S3 对象存储 → 提供回放              │
 │                                                                   │
 │  ARIMA (预测模块)                                                 │
 │  └── 每日定时分析历史数据 → 生成未来24小时人流量预测               │
@@ -92,7 +92,7 @@
 | 边缘端 | Python 3.8+ / OpenCV / PyTorch / Redis |
 | 云端后台 | Spring MVC 4.3 / MyBatis / MySQL |
 | 消息队列 | RabbitMQ（设备指令 + 实时数据） |
-| 视频存储 | Hadoop HDFS |
+| 视频存储 | S3 协议（MinIO / 阿里云 OSS / AWS S3） |
 | 实时推送 | WebSocket (JSR-356) |
 | 前端 | Layui + jQuery + ECharts |
 
@@ -102,7 +102,7 @@
 safely/
 ├── cloud/
 │   ├── anbao/              # 云端业务后台 (Spring MVC + MyBatis)
-│   ├── videoIO/            # 视频接收与存储 (HDFS)
+│   ├── videoIO/            # 视频接收与存储 (S3协议)
 │   ├── html/               # Web 管理前端
 │   └── time_serie_ARIMA/   # Prophet 人流量预测
 ├── edge/
