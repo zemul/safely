@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
     <link rel="stylesheet" href="../../static/admin/layui/css/layui.css" media="all">
     <script src="../static/admin/js/jquery-3.3.1.js"></script>
+<script src="/static/js/auth.js"></script>
 </head>
 
 <body>
@@ -90,7 +91,7 @@
             return;
         }
 
-        $.post("http://127.0.0.1:8080/echarts/history",{ "mac": mac , "num" : num}, function(json){
+        $.post("/api/echarts/history",{ "mac": mac , "num" : num}, function(json){
             setEcharts(json.ylist,json.xlist,json.zlist);
             
         });
@@ -242,7 +243,7 @@
 
     //动态获取下拉菜单选项[边缘]
     $.ajax({
-        url:'http://127.0.0.1:8080/area/getAreaName',
+        url:'/api/area/getAreaName',
         xhrFields: {withCredentials: true},
         dataType:'json',
         method:'POST',
@@ -259,7 +260,7 @@
 
 
                 $.ajax({
-                    url:'http://127.0.0.1:8080/area/getAreaDevice',
+                    url:'/api/area/getAreaDevice',
                     dataType:'json',
                     data:{ "aid": message.data2.aid},
                     method:'POST',
@@ -305,7 +306,7 @@
         //动态获取下拉菜单选项
 
         $.ajax({
-            url:'http://127.0.0.1:8080/area/getAreaDevice',
+            url:'/api/area/getAreaDevice',
             dataType:'json',
             data:{ "aid": data.value},
             method:'POST',
@@ -376,7 +377,7 @@
             var day2 = value.substring(13,23);
             var mac=$("#equ-id").val();
             //ajax请求返回图表
-            $.post("http://127.0.0.1:8080/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day1,"day2" : day2}, function(json){
+            $.post("/api/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day1,"day2" : day2}, function(json){
                 setEcharts(json.ylist,json.xlist);
 
 

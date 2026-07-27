@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
     <link rel="stylesheet" href="../../static/admin/layui/css/layui.css" media="all">
+<script src="/static/js/auth.js"></script>
 </head>
 <body>
 <div class="page-content-wrap">
@@ -81,7 +82,7 @@
 
     //动态获取下拉菜单选项[边缘]
     $.ajax({
-        url:'http://127.0.0.1:8080/area/getAreaName',
+        url:'/api/area/getAreaName',
         xhrFields: {withCredentials: true},
         dataType:'json',
         method:'POST',
@@ -89,7 +90,7 @@
             if(message.data2.state==2 || message.data2.state ==3){
                 //边缘段管理员
                 $.ajax({
-                    url:'http://127.0.0.1:8080/area/getAreaDevice',
+                    url:'/api/area/getAreaDevice',
                     dataType:'json',
                     data:{ "aid": message.data2.aid},
                     method:'POST',
@@ -152,12 +153,12 @@
         var valueList2;
         //请求数据
         $.ajaxSettings.async = false;
-        $.post("http://127.0.0.1:8080/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day1,"day2" : day2}, function(json){
+        $.post("/api/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day1,"day2" : day2}, function(json){
             dateList =json.ylist;
             valueList=json.xlist;
         });
         $.ajaxSettings.async = false;
-        $.post("http://127.0.0.1:8080/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day3,"day2" : day4}, function(json){
+        $.post("/api/echarts/BetweenDayHistory",{ "mac": mac , "day1" : day3,"day2" : day4}, function(json){
             dateList2 =json.ylist;
             valueList2=json.xlist;
         });

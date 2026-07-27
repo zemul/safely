@@ -10,6 +10,7 @@
 
     <link rel="stylesheet" type="text/css" href="../static/admin/css/admin.css" />
     <link rel="stylesheet" href="../static/admin/layui/css/layui.css">
+<script src="/static/js/auth.js"></script>
 </head>
 
 <body>
@@ -184,7 +185,7 @@
 
         //动态获取下拉菜单选项[边缘]
         $.ajax({
-            url:'http://127.0.0.1:8080/area/getAreaName',
+            url:'/api/area/getAreaName',
             xhrFields: {withCredentials: true},
             dataType:'json',
             method:'POST',
@@ -199,7 +200,7 @@
                     $("#fringe").css('color','#000000');
 
                     $.ajax({
-                        url:'http://127.0.0.1:8080/area/getAreaDevice',
+                        url:'/api/area/getAreaDevice',
                         dataType:'json',
                         data:{ "aid": message.data2.aid},
                         method:'POST',
@@ -229,7 +230,7 @@
         //监听选择边缘端
         form.on("select(fringe)", function(data){
             $.ajax({
-                url:'http://127.0.0.1:8080/area/getAreaDevice',
+                url:'/api/area/getAreaDevice',
                 dataType:'json',
                 data:{ "aid": data.value},
                 method:'POST',
@@ -265,7 +266,7 @@
 
             //获取设备信息，绑定的用户
             $.ajax({
-                url:'http://127.0.0.1:8080/device/selectDeviceInfo',
+                url:'/api/device/selectDeviceInfo',
                 dataType:'json',
                 data:{ "mac": mac},
                 method:'POST',
@@ -328,7 +329,7 @@
 
                 $.ajax({
                     type: 'POST',
-                    url: 'http://127.0.0.1:8080/echarts/normal' ,
+                    url: '/api/echarts/normal' ,
                     data:{"mac" :mac},
                     dataType:'json',
                     success: function (response) {
@@ -410,7 +411,7 @@
                 if ('WebSocket' in window) {
                     // alert("浏览器支持Websocket")
                     if(websocket ==null){
-                        websocket = new WebSocket("ws://127.0.0.1:8080/webSocket/"+mac);
+                        websocket = new WebSocket("ws://" + window.location.host + "/ws/"+mac);
                     }
                 } else {
                     console.log('当前浏览器 Not support websocket')

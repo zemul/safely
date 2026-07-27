@@ -10,7 +10,8 @@
 		<link rel="stylesheet" type="text/css" href="../static/admin/layui/css/layui.css"/>
 		<link rel="stylesheet" type="text/css" href="../static/admin/css/admin.css"/>
 		<script src="../static/admin/js/jquery-3.3.1.js" charset="utf-8"></script>
-	</head>
+	<script src="/static/js/auth.js"></script>
+</head>
 	<body>
 		<div class="layui-tab page-content-wrap">
 		  <ul class="layui-tab-title">
@@ -129,7 +130,7 @@
 		  //表单填写
 			$.ajax({
 				type: 'POST',
-				url: 'http://127.0.0.1:8080/user/getIndexInfo' ,
+				url: '/api/user/getIndexInfo' ,
 				xhrFields: {withCredentials: true},
 				dataType:'json',
 				success: function (response) {
@@ -150,7 +151,7 @@
 		  form.on('submit(adminInfo)', function(data){
 			  $.ajax({
 					type: 'POST',
-					url: 'http://127.0.0.1:8080/user/resetuserinfo',
+					url: '/api/user/resetuserinfo',
 				    xhrFields: {withCredentials: true},
 					data: data.field,
 					end:
@@ -169,7 +170,7 @@
 			}else{
 				$.ajax({
 					type: 'POST',
-					url: 'http://127.0.0.1:8080/user/createPassword',
+					url: '/api/user/createPassword',
 					contentType : "application/x-www-form-urlencoded",
 					data: data.field
 
@@ -200,7 +201,7 @@
 				}else{
 					$.ajax({
 						type: 'POST',
-						url: 'http://127.0.0.1:8080/user/resetpassword',
+						url: '/api/user/resetpassword',
 						contentType : "application/x-www-form-urlencoded",
 						data: data.field,
 						success: function (response) {

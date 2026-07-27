@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="../static/admin/css/admin.css" />
     <link rel="stylesheet" href="../static/admin/formSelect/formSelects-v4.css">
 
+<script src="/static/js/auth.js"></script>
 </head>
 
 <body>
@@ -331,7 +332,7 @@
 
     //动态获取下拉菜单选项
     $.ajax({
-        url:'http://127.0.0.1:8080/area/getAreaName',
+        url:'/api/area/getAreaName',
         xhrFields: {withCredentials: true},
         dataType:'json',
         method:'POST',
@@ -344,7 +345,7 @@
                 $("#fringe").val(message.data2.aid);//默认选中
                 $("#fringe").attr('disabled','disabled');
                 $("#fringe").css('color','#000000');
-                $("#xhsearch").attr("xm-select-search","http://127.0.0.1:8080/user/getSelectUser?aid="+$("#aid").val());
+                $("#xhsearch").attr("xm-select-search","/api/user/getSelectUser?aid="+$("#aid").val());
                 //执行重载
                 table.reload('EquReload', {
                     page: {
@@ -401,7 +402,7 @@
             return ;
         }
         $.ajax({
-            url:"http://127.0.0.1:8080/device/askImage",
+            url:"/api/device/askImage",
             dataType:"json",
             method:"POST",
             data:{"mac":editMac}
@@ -562,7 +563,7 @@
     //监听添加表单提交
     form.on('submit(addform)', function(data) {
         $.ajax({
-            url:'http://127.0.0.1:8080/device/Device',
+            url:'/api/device/Device',
             dataType:'json',
             method: 'POST',
             data:data.field,
@@ -573,7 +574,7 @@
     form.on('submit(editform)', function(data) {
         console.log(JSON.stringify(data.field));
         $.ajax({
-            url:'http://127.0.0.1:8080/device/updateDevice',
+            url:'/api/device/updateDevice',
             dataType:'json',
             method: 'POST',
             data:data.field,
@@ -603,7 +604,7 @@
     //数据表格渲染
     table.render({
         elem: '#equ-info',
-        url:'http://127.0.0.1:8080/device/getDeviceList',
+        url:'/api/device/getDeviceList',
         method:'post',
         response: {
             countName: 'total'
@@ -666,7 +667,7 @@
                     noBingDevice($("#aid").val());
 
                     layui.formSelects.data('selectname', 'server', {
-                        url: "http://127.0.0.1:8080/user/getSelectUser?aid="+$("#aid").val()
+                        url: "/api/user/getSelectUser?aid="+$("#aid").val()
                     });
 
                 },
@@ -691,7 +692,7 @@
                     $("#aid").val($("#fringe").val());
                     noBingDevice($("#aid").val());
                     layui.formSelects.data('selectname', 'server', {
-                        url: "http://127.0.0.1:8080/user/getSelectUser?aid="+$("#aid").val()
+                        url: "/api/user/getSelectUser?aid="+$("#aid").val()
                     });
 
 
@@ -711,7 +712,7 @@
     //根据aid获取未绑定信息
     function noBingDevice(aid){
         $.ajax({
-            url:'http://127.0.0.1:8080/device/getSelectDevice',
+            url:'/api/device/getSelectDevice',
             dataType:'json',
             data:{ "aid": aid},
             method:'POST',
@@ -744,7 +745,7 @@
             layer.confirm('确定删除这台设备吗？', function(index){  //删除设备 并向服务器发送信息
                 $.ajax({
                     type: 'POST',
-                    url:'http://127.0.0.1:8080/device/deleteDevice',
+                    url:'/api/device/deleteDevice',
                     dataType:'json',
                     data:obj.data,
                     success:function(){
@@ -772,7 +773,7 @@
                         $("#threshold").val(data.threshold);
                         $("#equ-warning-scope2").val(data.time);
                         layui.formSelects.data('selectname2', 'server', {
-                            url: "http://127.0.0.1:8080/user/getSelectUser?aid="+data.aid+"&mac="+$("#mac").val()
+                            url: "/api/user/getSelectUser?aid="+data.aid+"&mac="+$("#mac").val()
                         });
 
 
@@ -801,7 +802,7 @@
                         $("#threshold").val(data.threshold);
                         $("#equ-warning-scope2").val(data.time);
                         layui.formSelects.data('selectname2', 'server', {
-                            url: "http://127.0.0.1:8080/user/getSelectUser?aid="+data.aid+"&mac="+$("#mac").val()
+                            url: "/api/user/getSelectUser?aid="+data.aid+"&mac="+$("#mac").val()
                         });
 
                     },

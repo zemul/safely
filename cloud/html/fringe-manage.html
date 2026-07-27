@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../../static/admin/layui/css/layui.css" />
     <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
 
+<script src="/static/js/auth.js"></script>
 </head>
 
 <body>
@@ -138,7 +139,7 @@
     //监听添加表单提交
     form.on('submit(addform)', function(data) {
         $.ajax({
-            url:'http://127.0.0.1:8080/area/addArea',
+            url:'/api/area/addArea',
             dataType:'json',
             type: 'POST',
             contentType : "application/x-www-form-urlencoded",
@@ -157,7 +158,7 @@
         console.log(JSON.stringify(data.field));
         $.ajax({
             type: 'POST',
-            url:'http://127.0.0.1:8080/area/updateArea',
+            url:'/api/area/updateArea',
             dataType:'json',
             contentType : "application/x-www-form-urlencoded",
             data:data.field,
@@ -171,7 +172,7 @@
     table.render({
         elem: '#fringe-info',
 
-        url:'http://127.0.0.1:8080/area/getAreaList',
+        url:'/api/area/getAreaList',
         method:'post',
         response: {
             countName: 'total'
@@ -245,7 +246,7 @@
             layer.confirm('确定删除这个边缘端吗？', function(index){  //删除设备 并向服务器发送信息
                 $.ajax({
                     type: 'POST',
-                    url:'http://127.0.0.1:8080/area/deleteArea',
+                    url:'/api/area/deleteArea',
                     dataType:'json',
                     contentType : "application/x-www-form-urlencoded",
                     data:obj.data,

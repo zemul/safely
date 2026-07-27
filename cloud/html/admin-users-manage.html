@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../../static/admin/layui/css/layui.css" />
     <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
 
+<script src="/static/js/auth.js"></script>
 </head>
 
 <body>
@@ -156,7 +157,7 @@
     var layer=layui.layer
     //动态获取下拉菜单选项
     $.ajax({
-        url:'http://127.0.0.1:8080/area/getAreaName',
+        url:'/api/area/getAreaName',
         xhrFields: {withCredentials: true},
         dataType:'json',
         contentType : "application/x-www-form-urlencoded",
@@ -216,7 +217,7 @@
     form.on('submit(addform)', function(data) {
         console.log(JSON.stringify(data.field));
         $.ajax({
-            url:'http://127.0.0.1:8080/user/insertUser',
+            url:'/api/user/insertUser',
             dataType:'json',
             method: 'POST',
             data:data.field,
@@ -227,7 +228,7 @@
     form.on('submit(editform)', function(data) {
         console.log(JSON.stringify(data.field));
         $.ajax({
-            url:'http://127.0.0.1:8080/usesr/updateUser',
+            url:'/api/usesr/updateUser',
             dataType:'json',
             method: 'POST',
             data:data.field,
@@ -240,7 +241,7 @@
     table.render({
         elem: '#equ-info',
         method:'post',
-        url:'http://127.0.0.1:8080/user/getUserList',
+        url:'/api/user/getUserList',
         response: {
             countName: 'total'
             ,dataName: 'data'
@@ -361,7 +362,7 @@
             layer.confirm('确定删除这个保安吗？', function(index){  //删除设备 并向服务器发送信息
                 $.ajax({
                     type: 'POST',
-                    url:'http://127.0.0.1:8080/user/deleteUser',
+                    url:'/api/user/deleteUser',
                     dataType:'json',
                     data:obj.data,
                     success:function(data){

@@ -3,8 +3,6 @@
 import logging
 from datetime import datetime, timedelta
 
-import pandas as pd
-from prophet import Prophet
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +14,13 @@ logger = logging.getLogger(__name__)
 
 async def run_forecast():
     """对所有设备执行一次预测"""
+    try:
+        import pandas as pd
+        from prophet import Prophet
+    except ImportError:
+        logger.warning("Prophet/pandas not installed, skip forecast")
+        return
+
     async with SessionLocal() as db:
         devices = (await db.execute(select(Monitored.mac))).scalars().all()
 
@@ -28,6 +33,9 @@ async def run_forecast():
 
 async def forecast_device(mac: str):
     """单个设备的 Prophet 预测"""
+    import pandas as pd
+    from prophet import Prophet
+
     async with SessionLocal() as db:
         # 取最近 30 天数据
         result = await db.execute(

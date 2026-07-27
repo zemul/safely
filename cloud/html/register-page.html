@@ -117,7 +117,7 @@
          }
          $.ajax({
              type: 'POST',
-             url: 'http://127.0.0.1:8080/user/getPhoneCode',
+             url: '/api/user/getPhoneCode',
              xhrFields: {withCredentials: true},
              data: $('#f').serialize(),
              success: function (response) {
@@ -156,7 +156,7 @@
         }else {
             $.ajax({
                 type: 'POST',
-                url: 'http://127.0.0.1:8080/user/register' ,
+                url: '/api/user/register' ,
                 xhrFields: {withCredentials: true},
                 data: $('#f').serialize(),
                 success: function (response) {

@@ -10,6 +10,7 @@
 	<link rel="stylesheet" type="text/css" href="../static/admin/css/admin.css"/>
 	<link rel="stylesheet" href="../static/admin/font/iconfont.css">
 
+<script src="/static/js/auth.js"></script>
 </head>
 
 <body>
@@ -182,7 +183,7 @@
        //用户权限控制
 		$.ajax({
 			type: 'POST',
-			url: 'http://127.0.0.1:8080/user/getIndexInfo' ,
+			url: '/api/user/getIndexInfo' ,
 			xhrFields: {withCredentials: true},
 			dataType:'json',
 			success: function (response) {    //返回值即为状态码
@@ -218,7 +219,7 @@
 		//获取message
 		$.ajax({
 			type: 'POST',
-			url: 'http://127.0.0.1:8080/user/message',
+			url: '/api/user/message',
 			xhrFields: {withCredentials: true},
 			dataType:'json',
 			success:function (resp) {
@@ -282,7 +283,7 @@
 						$("#hdd").hide();
 						// $.ajax({
 						// 	type: 'POST',
-						// 	url: 'http://127.0.0.1:8080/user/getIndexInfo',
+						// 	url: '/api/user/getIndexInfo',
 						// 	xhrFields: {withCredentials: true},
 						// 	dataType: 'json',
 						// 	success: function (response) {

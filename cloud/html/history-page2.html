@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="../../static/admin/css/admin.css" />
     <link rel="stylesheet" href="../../static/admin/layui/css/layui.css" media="all">
     <script src="../static/admin/js/jquery-3.3.1.js"></script>
+<script src="/static/js/auth.js"></script>
 </head>
 
 <body>
@@ -80,7 +81,7 @@
     //数据表格渲染
     table.render({
         method:'post',
-        url:'http://127.0.0.1:8080/exception',
+        url:'/api/exception',
         elem: '#equ-info',
         title: '异常信息表',
         limit:8,
@@ -104,7 +105,7 @@
 
     //动态获取下拉菜单选项[边缘]
     $.ajax({
-        url:'http://127.0.0.1:8080/area/getAreaName',
+        url:'/api/area/getAreaName',
         xhrFields: {withCredentials: true},
         dataType:'json',
         method:'POST',
@@ -121,7 +122,7 @@
 
 
                 $.ajax({
-                    url:'http://127.0.0.1:8080/area/getAreaDevice',
+                    url:'/api/area/getAreaDevice',
                     dataType:'json',
                     data:{ "aid": message.data2.aid},
                     method:'POST',

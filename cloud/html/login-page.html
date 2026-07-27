@@ -104,14 +104,15 @@
         }
         $.ajax({
             type: 'POST',
-            url:"http://127.0.0.1:8080/user/login",
-            data:$('#f').serialize(),
+            url:"/api/user/login",
+            contentType: "application/json",
+            data: JSON.stringify({tel: $("#tel").val(), password: $("#password").val()}),
             dataType:"json",
-            xhrFields: {withCredentials: true},
             error:function(data){
             },
             success:function(response){
                 if(response.status=="200"){
+                    localStorage.setItem('safely_token', response.token);
                     window.location.href="/index.html";
                 }else if(response.status=="201"){
                     layer.msg("密码输入错误");
