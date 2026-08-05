@@ -26,7 +26,7 @@
 		<pagehelper.version>5.3.3</pagehelper.version>
 		<jsqlparser.version>0.9.1</jsqlparser.version>
 		<commons-fileupload.version>1.5</commons-fileupload.version>
-		<jedis.version>3.9.0</jedis.version>
+		<jedis.version>7.5.3</jedis.version>
 		<solrj.version>10.0.0</solrj.version>
 		<freemarker.version>2.3.34</freemarker.version>
 		<quartz.version>2.2.2</quartz.version>
@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>3.9.0</version>
+			<version>7.5.3</version>
 		</dependency>
 			<dependency>
     			<groupId>org.apache.commons</groupId>
