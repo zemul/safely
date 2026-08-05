@@ -25,7 +25,7 @@
 		<commons-net.version>3.3</commons-net.version>
 		<pagehelper.version>5.3.3</pagehelper.version>
 		<jsqlparser.version>0.9.1</jsqlparser.version>
-		<commons-fileupload.version>1.5</commons-fileupload.version>
+		<commons-fileupload.version>1.6.0</commons-fileupload.version>
 		<jedis.version>7.5.3</jedis.version>
 		<solrj.version>10.0.0</solrj.version>
 		<freemarker.version>2.3.34</freemarker.version>
