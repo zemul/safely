@@ -29,7 +29,7 @@
 		<jedis.version>7.5.3</jedis.version>
 		<solrj.version>10.0.0</solrj.version>
 		<freemarker.version>2.3.34</freemarker.version>
-		<quartz.version>2.2.2</quartz.version>
+		<quartz.version>2.5.2</quartz.version>
 	</properties>
 	
 	<dependencies>
