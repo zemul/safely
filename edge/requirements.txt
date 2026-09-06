@@ -63,7 +63,7 @@ h5py==3.10.0
 dlib==19.24.2
 
 # gRPC
-grpcio==1.60.0
+grpcio==1.83.0
 
 # Crypto (pycrypto replaced with pycryptodome)
 pycryptodome==3.19.1
