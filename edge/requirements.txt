@@ -44,7 +44,7 @@ scipy==1.10.1
 pandas==2.0.3
 scikit-learn==1.5.0
 scikit-image==0.21.0
-matplotlib==3.7.5
+matplotlib==3.11.1
 
 # Image / video processing
 Pillow==12.3.0
