@@ -8,7 +8,7 @@
 	<properties>
 		<junit.version>4.13.2</junit.version>
 		<spring.version>7.0.10</spring.version>
-		<mybatis.version>3.5.19</mybatis.version>
+		<mybatis.version>3.6.0</mybatis.version>
 		<mybatis.spring.version>4.1.0</mybatis.spring.version>
 		<mybatis.paginator.version>1.2.17</mybatis.paginator.version>
 		<mysql.version>8.0.33</mysql.version>
